@@ -1,0 +1,55 @@
+--- build.js	2018-09-27 18:11:37.409121678 +0900
++++ build.js.new	2018-09-27 18:18:03.751740338 +0900
+@@ -817,7 +817,52 @@
+         "xlibs",
+         "images",
+         "sass",
++        "unitycindy3d",
++        "audio",
+         "symbolic"
+     ].concat(gwt_modules));
+ 
++
++    //////////////////////////////////////////////////////////////////////
++    // Build UnityCindy3D-plugin
++    //////////////////////////////////////////////////////////////////////
++
++    task("unitycindy3d", ["closure-jar"], function() {
++        this.setting("closure_version");
++        var opts = {
++            language_in: "ECMASCRIPT6_STRICT",
++            language_out: "ECMASCRIPT5_STRICT",
++            dependency_mode: "LOOSE",
++            compilation_level: "SIMPLE",
++            rewrite_polyfills: false,
++            warning_level: "DEFAULT",
++            output_wrapper_file: "plugins/unitycindy3d/src/js/UnityCindy3D.js.wrapper",
++            js_output_file: "build/js/UnityCindy3D.js",
++            externs: ["plugins/cindyjs.externs", "plugins/unitycindy3d/src/js/UnityCindy3D.externs"],
++            js: ["plugins/unitycindy3d/src/js/Ops3D.js", "plugins/cindy3d/src/js/Interface.js",
++            ],
++        };
++        this.closureCompiler(closure_jar, opts);
++    });
++
++    //////////////////////////////////////////////////////////////////////
++    // Build audio-plugin
++    //////////////////////////////////////////////////////////////////////
++
++    task("audio", ["closure-jar"], function() {
++        this.setting("closure_version");
++        var opts = {
++            language_in: "ECMASCRIPT6_STRICT",
++            language_out: "ECMASCRIPT5_STRICT",
++            dependency_mode: "LOOSE",
++            compilation_level: "SIMPLE",
++            rewrite_polyfills: false,
++            warning_level: "DEFAULT",
++            output_wrapper_file: "plugins/audio/src/js/audio.js.wrapper",
++            js_output_file: "build/js/audio.js",
++            externs: "plugins/cindyjs.externs",
++            js: ["plugins/audio/src/js/audio.js"]
++        };
++        this.closureCompiler(closure_jar, opts);
++    });    
+ };

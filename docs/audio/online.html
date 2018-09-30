@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Playing an online audio file</title>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="https://cindyjs.org/dist/latest/CindyJS.css">
+<script type="text/javascript" src="https://cindyjs.org/dist/latest/Cindy.js"></script>
+<script type="text/javascript" src="https://tmytokai.github.io/CindyJSPlugins/dist/latest/audio/audio.js"></script>
+
+<script type="text/javascript">
+  CindyJS( {
+    ports: [ 
+      { 
+        id: "CSCanvas", 
+        width: 700, height: 600, 
+        transform: [ { visibleRect: [ 0, 6, 7, 0 ] } ] 
+      }
+    ],
+    scripts:"cs*",
+    autoplay: true,
+    use: [ "audio" ],
+    geometry: [
+      {name:"SpectrogramL", type:"Free", pos:[ 0.25,  5.75 ], labeled: true},
+      {name:"SpectrogramR", type:"Free", pos:[ 3.00,  5.75 ], labeled: true},
+      {name:"SpectrumL",    type:"Free", pos:[ 0.25,  2.75 ], labeled: true},
+      {name:"SpectrumR",    type:"Free", pos:[ 3.00,  2.75 ], labeled: true},
+      {name: "Play", type: "Button", pos: [6.0, 5.5], color: [0.0, 0.0, 0.0], text: "Play"
+                   , script: 'playaudio( "https://tmytokai.github.io/CindyJSPlugins/audio/sample.wav" );' },
+      {name: "Stop", type: "Button", pos: [6.0, 5.0], color: [0.0, 0.0, 0.0], text: "Stop"
+                   , script: 'stopaudio();' },
+    ],
+  } );
+</script>
+
+<script id="csinit" type="text/x-cindyscript">
+</script>
+
+<script id="csdraw" type="text/x-cindyscript">
+  repeat( 2, start->0, ch, 
+     audiodrawspectrogram( if( ch == 0, SpectrogramL, SpectrogramR ), ch );
+     audiodrawspectrum( if( ch == 0, SpectrumL, SpectrumR ), ch );
+  );
+</script>
+
+</head>
+
+<body>
+<h2>Playing an online audio file</h2>
+<ol>
+<li>Push the "Play" button.</li>
+<li>Push the "Stop" button to stop.</li>
+</p>
+<div id="CSCanvas" style="width:700px; height:600px;"></div>
+</body>
+
+</html>
