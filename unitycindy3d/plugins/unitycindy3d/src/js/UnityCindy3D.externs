@@ -1,0 +1,4 @@
+function gameInstance(){}
+gameInstance.SendMessage;
+
+function uc3dBuffer(){}

@@ -1,0 +1,1 @@
+All Scripts in this folder are external codes. So if you want to use them, follow the each licence.

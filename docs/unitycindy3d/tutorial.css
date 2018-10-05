@@ -1,0 +1,31 @@
+div.contents {
+  width: 550px;
+  padding: 10px;
+}
+ 
+div.side {
+  width: 650px;
+  padding: 10px;
+
+  position: fixed;
+  top: 10px;
+  left: 580px;
+}
+
+textarea#code{
+  resize: none;
+  width: 598px;
+  height:200px;
+  padding: 0px;
+  margin: 0px;
+  border:1px solid black
+}
+
+pre.code{
+  white-space: pre-wrap;
+  word-break: break-all;
+  padding: 10px;
+  border-width: 1px; 
+  border-style: solid;
+  border-color: black;
+}

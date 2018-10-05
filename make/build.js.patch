@@ -26,7 +26,7 @@
 +            output_wrapper_file: "plugins/unitycindy3d/src/js/UnityCindy3D.js.wrapper",
 +            js_output_file: "build/js/UnityCindy3D.js",
 +            externs: ["plugins/cindyjs.externs", "plugins/unitycindy3d/src/js/UnityCindy3D.externs"],
-+            js: ["plugins/unitycindy3d/src/js/Ops3D.js", "plugins/cindy3d/src/js/Interface.js",
++            js: ["plugins/unitycindy3d/src/js/UnityCindy3D.js", "plugins/cindy3d/src/js/Interface.js",
 +            ],
 +        };
 +        this.closureCompiler(closure_jar, opts);

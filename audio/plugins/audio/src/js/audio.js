@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2018 tmytokai
+Copyright (C) 2018 https://github.com/tmytokai/CindyJSPlugins
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -83,14 +83,14 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	Height : 256,
     }
 
-    let SetupAudioContext = function () {
+    const SetupAudioContext = function () {
 
 	if( audioCtx == null ){
 	    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 	}
     }
 
-    let SetupBufferSrc = function ( buffer ) {
+    const SetupBufferSrc = function ( buffer ) {
 
 	if( audioBufferSrc == null ){
 	    audioBufferSrc = audioCtx.createBufferSource();
@@ -103,14 +103,14 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	}
     }
 
-    let SetupSplitter = function () {
+    const SetupSplitter = function () {
 
 	if( audioSplitter == null ){
 	    audioSplitter = audioCtx.createChannelSplitter( audioBufferSrc.buffer.numberOfChannels );
 	}
     }
 
-    let SetupAnalyser = function () {
+    const SetupAnalyser = function () {
 
 	for( let ch = 0; ch < audioBufferSrc.buffer.numberOfChannels; ++ch ){
 
@@ -130,7 +130,7 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	}
     }
 
-    let SetupProcessor = function () {
+    const SetupProcessor = function () {
 
 	if( audioProcessor == null ){
 
@@ -148,7 +148,7 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	}
     }
 
-    let SetupCanvas = function () {
+    const SetupCanvas = function () {
 
 	CreateColormap();
 	for( let ch = 0; ch < audioConfigs.maxChannels; ++ch ){
@@ -158,7 +158,7 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	audioSpecGram.pos = 0;
     }
 
-    let CreateColormap = function(){
+    const CreateColormap = function(){
 
 	if( audioColorMap.canvas == null ){
 	    audioColorMap.canvas = document.createElement("canvas");
@@ -177,7 +177,7 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	}
     }
 
-    let CreateCanvas = function( ch ){
+    const CreateCanvas = function( ch ){
 
 	if( audioSpec.canvas[ch] == null ){
 	    audioSpec.canvas[ch] = document.createElement("canvas");
@@ -200,7 +200,7 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	}
     }
 
-    let ClearCanvas = function( ch ){
+    const ClearCanvas = function( ch ){
 
 	if( audioSpec.canvas[ch] != null ){
 	    for( let idx = 0; idx < audioSpec.Height*audioSpec.Width*4; idx += 4 ){
@@ -222,7 +222,7 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	}
     }
 
-    let RenderCanvas = function ( ch ){
+    const RenderCanvas = function ( ch ){
 
 	if( audioSpec.canvas[ch] != null ){
 
@@ -264,7 +264,7 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	}
     }
 
-    let PlayAudio = function ( buffer ) {
+    const PlayAudio = function ( buffer ) {
 
 	SetupBufferSrc( buffer );
 	SetupSplitter();
@@ -284,7 +284,7 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	audioBufferSrc.start( 0 );
     }
 
-    let PlayLocalAudio = function ( id ) {
+    const PlayLocalAudio = function ( id ) {
 
 	if( audioBufferSrc != null ) return;
 
@@ -311,7 +311,7 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	fr.readAsArrayBuffer( file );
     }
 
-    let PlayOnlineAudio = function ( url ) {
+    const PlayOnlineAudio = function ( url ) {
 
 	if( audioBufferSrc != null ) return;
 
@@ -340,7 +340,7 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	request.send();
     }
 
-    let GetDstPoint = function( ch, dst ){
+    const GetDstPoint = function( ch, dst ){
 
         let clw = api.instance["canvas"]["clientWidth"];
         let clh = api.instance["canvas"]["clientHeight"];

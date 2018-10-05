@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>UnityCindy3D Tutorial</title>
+<meta charset="utf-8">
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<link rel="stylesheet" href="./tutorial.css">
+
+<link rel="stylesheet" href="https://cindyjs.org/dist/latest/CindyJS.css">
+<script type="text/javascript" src="https://cindyjs.org/dist/latest/Cindy.js"></script>
+
+<link rel="stylesheet"        href="../dist/latest/unitycindy3d/viewer/TemplateData/style.css">
+<link rel="shortcut icon"     href="../dist/latest/unitycindy3d/viewer/TemplateData/favicon.ico">
+<script type="text/javascript" src="../dist/latest/unitycindy3d/viewer/TemplateData/UnityProgress.js"></script>  
+<script type="text/javascript" src="../dist/latest/unitycindy3d/viewer/Build/UnityLoader.js"></script>
+<script type="text/javascript" src="../dist/latest/unitycindy3d/UnityCindy3D.js"></script>
+
+<script type="text/javascript">
+  let cdy = null;
+  let gameInstance = UnityLoader.instantiate( "UC3DCanvas", 
+                                              "../dist/latest/unitycindy3d/viewer/Build/WebGL.json", 
+                                              {onProgress: UnityProgress} );
+  const startCS = function ()
+  {
+    if( gameInstance == null ) return; 
+    if( cdy != null ) return;
+
+    cdy = CindyJS( {
+            ports: [
+              {
+                id: "CSCanvas", 
+                width: 600, height: 100, 
+                transform: [ { visibleRect: [ -3, 0.5, 3, -0.5 ] } ],  // left,top,right,bottom
+                background: "rgb(168,176,192)" 
+              } 
+              ],
+              scripts: { tick: "update3d()" },
+              autoplay: true,
+              use: ["UnityCindy3D"],
+              angleUnit: "°", 
+              geometry: [
+                {name:"AL", type:"Free", pos:[ -1,  0.2], color: [ 0, 0, 0 ], size: 1},
+                {name:"AR", type:"Free", pos:[  1,  0.2], color: [ 0, 0, 0 ], size: 1},
+                {name:"sga", type:"Segment", args:["AL","AR"], color:[ 0, 0, 0], size:1 },
+                {name:"A", type:"PointOnSegment", args: ["sga"], pos:[ 0,  0.2], color: [ 1, 1, 0 ], labeled: true},
+
+                {name:"BL", type:"Free", pos:[ -1,  -0.2], color: [ 0, 0, 0 ], size: 1},
+                {name:"BR", type:"Free", pos:[  1,  -0.2], color: [ 0, 0, 0 ], size: 1},
+                {name:"sgb", type:"Segment", args:["BL","BR"], color:[ 0, 0, 0], size:1 },
+                {name:"B", type:"PointOnSegment", args: ["sgb"], pos:[ 0,  -0.2], color: [ 0, 1, 1 ], labeled: true},
+
+                {name:"O", type:"Free", pos:[-2,0], size:0, pinned: true },
+                {name:"CMR", type:"CircleMFixedr", args:["O"], radius:0.4 },
+                {name:"C", type:"PointOnCircle", args:["CMR"], pos:[-1.6,0], color:[ 1, 0, 0 ], labeled: true },
+                {name:"D", type:"Free", pos:[-1.6,0], size:0, pinned: true, labeled: false },
+                {name: "OC", type: "Segment", color: [ 0.0, 0.0, 1.0 ], args: [ "O", "C" ] }, 
+		{name: "OD", type: "Segment", color: [ 0.0, 0.0, 1.0 ], args: [ "O", "D" ] }, 
+		{name: "angl", type: "Angle", args: [ "OC", "OD", "O" ], angle: 0 }
+              ],
+            } );
+  };
+
+  const resetButtonClicked = function ()
+  {
+    let cs = "clear3d(); A.xy = [0,0.2]; B.xy = [0,-0.2]; C.xy = [-1.6,0];";
+    if( cdy != null ) cdy.evokeCS( cs );
+  }
+
+  const runButtonClicked = function (id)
+  {
+    let cs = "";
+    if( id == "yourcode" ) cs = document.getElementById( id ).value;
+    else cs = document.getElementById( id ).textContent;
+    console.log(cs);
+    if( cdy != null ) cdy.evokeCS( "clear3d();" + cs );
+  }
+
+  document.addEventListener( 'click', function(e) 
+  {
+    if( gameInstance == null ) return;
+    if( cdy == null ) return;
+
+    if (e.target.id == "#canvas") {
+          gameInstance.SendMessage ( 'Manager', 'FocusCanvas3D', "true" );
+      } else {
+          gameInstance.SendMessage ( 'Manager', 'FocusCanvas3D', "false" );
+      }
+  });
+</script>
+
+</head>
+
+<body>
+
+<div class="side">
+  <div id="UC3DCanvas" style="width: 600px; height: 400px"></div>
+  <div id="CSCanvas"   style="width: 600px; height: 100px">Loading...Please wait.</div>
+  <br>
+  <input type="button" value="Reset" onclick="resetButtonClicked()" />
+  <br>
+  <p>
+  <input type="button" value="Run the under code" onclick="runButtonClicked('yourcode')" />
+  </p>
+  <textarea id="yourcode" cols="60" rows="15"></textarea>
+</div>
+
+</div>
+
+<div class="contents">
+
+<p>
+Last updated: 5 October 2018
+</p>
+
+<h1>UnityCindy3D Tutorial</h1>
+
+<br>
+<h2>point</h2>
+</p>
+<p>
+code:
+</p>
+<pre class="code" id="point">
+begin3d();
+
+// axes
+draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
+draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
+draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
+
+s=max( [1, 10.0*(A.x-AL.x)/(AR.x-AL.x)] );
+b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
+draw3d( [2,0,1], size->s, color->[1-b, 0, b] );
+
+end3d();
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('point')" /> </li>
+<li>Drag the viewer to rotate the camera.</li>
+<li>To change the size, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('point')" /> again. </li>
+<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('point')" />  again. </li>
+</ol>
+
+<br>
+<h2>segment</h2>
+<p>
+code:
+</p>
+<pre class="code" id="segment">
+begin3d();
+
+// axes
+draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
+draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
+draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
+
+s=max( [1, 10.0*(A.x-AL.x)/(AR.x-AL.x)] );
+b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
+draw3d( [0,0,0], [2,0,1], size->s, color->[1-b, 0, b] );
+
+end3d();
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('segment')" /> </li>
+<li>Drag the viewer to rotate the camera.</li>
+<li>To change the size, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('segment')" /> again. </li>
+<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('segment')" /> again. </li>
+</ol>
+
+<br>
+<h2>segments</h2>
+<p>
+code:
+</p>
+<pre class="code" id="segments">
+begin3d();
+
+// axes
+draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
+draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
+draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
+
+s=max( [1, 10.0*(A.x-AL.x)/(AR.x-AL.x)] );
+b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
+pt = [ [0,0,0], [2,-1,0], [2,-1,1], [-2,-1,1] ];
+connect3d( pt, size->s, color->[1-b, 0, b], topology->"close" );
+
+end3d();
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('segments')" /> </li>
+<li>Drag the viewer to rotate the camera.</li>
+<li>To change the size, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('segments')" /> again. </li>
+<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('segments')" /> again. </li>
+</ol>
+
+<br>
+<h2>polygon</h2>
+<p>
+code:
+</p>
+<pre class="code" id="polygon">
+begin3d();
+
+// axes
+draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
+draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
+draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
+
+b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
+pt = [ [0,0,0], [2,-1,0], [2,-1,1], [-2,-1,1] ];
+fillpoly3d( pt, color->[1-b, 0, b] );
+
+end3d();
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('polygon')" /> </li>
+<li>Drag the viewer to rotate the camera.</li>
+<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('polygon')" /> again. </li>
+</ol>
+
+<br>
+<h2>sphere</h2>
+<p>
+code:
+</p>
+<pre class="code" id="sphere">
+begin3d();
+
+// axes
+draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
+draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
+draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
+
+s=max( [0.1, 1*(A.x-AL.x)/(AR.x-AL.x)] );
+b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
+drawsphere3d( [2,0,1], s, color->[1-b, 0, b] );
+
+end3d();
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('sphere')" /> </li>
+<li>Drag the viewer to rotate the camera.</li>
+<li>To change the radius, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('sphere')" /> again. </li>
+<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('sphere')" /> again. </li>
+</ol>
+
+
+<br>
+<h2><a href="https://en.wikipedia.org/wiki/Torus_knot">torus knot(p,q)</a></h2>
+<p>
+code:
+</p>
+<pre class="code" id="torus">
+begin3d();
+
+// axes
+draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
+draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
+draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
+
+n=600; 
+p=3; 
+q=8; 
+pt=apply(0..n-1,i, w =i/n*2*pi; 
+  r=cos(q*w)+2; 
+  ( sin(q*w), r * cos(p*w), r * sin(p*w) ) ); 
+h=-angl/360°;
+cl=apply(0..n,i, hue( i/n+h ); );
+s=max( [1, 5.0*(A.x-AL.x)/(AR.x-AL.x)] );
+connect3d(pt,cl,size->s,topology->"close");
+
+end3d();
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('torus')" /> </li>
+<li>Drag the viewer to rotate the camera.</li>
+<li>To change the thickness, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('torus')" /> again. </li>
+<li>To change the color, rotate the point C, then push <input type="button" value="Run" onclick="runButtonClicked('torus')" /> again. </li>
+</ol>
+
+<br>
+<h2> Object Oriented Programming #1:
+<br>
+"basic"</h2>
+
+</h2>
+<p>
+code:
+</p>
+<pre class="code" id="oop1">
+  ///////////////////////////
+  // axes object
+  begin3d( "axes" );
+    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
+    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
+    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
+  end3d();
+
+  ///////////////////////////
+  // plane object
+  begin3d( "plane" );
+    pt=[ [ 5, 5,0], [ 5,-5,0], [-5,-5,0], [-5, 5,0] ];
+    fillpoly3d( pt, color->[0, 0.5, 0.5] );
+  end3d();
+
+  ///////////////////////////
+  // ball object
+  ball = begin3d( "ball" );
+    drawsphere3d( [0,0,0], 0.5, color->[1, 0, 0] );
+  end3d();
+
+  setposition3d( ball, [0,0,3] );
+
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop1')" /> </li>
+<li>Drag the viewer to rotate the camera.</li>
+</ol>
+
+<br>
+<h2> Object Oriented Programming #2:
+<br>
+"gravity"</h2>
+
+</h2>
+<p>
+code:
+</p>
+<pre class="code" id="oop2">
+  ///////////////////////////
+  // axes object
+  begin3d( "axes" );
+    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
+    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
+    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
+  end3d();
+
+  ///////////////////////////
+  // plane object
+  begin3d( "plane" );
+    pt=[ [ 5, 5,0], [ 5,-5,0], [-5,-5,0], [-5, 5,0] ];
+    fillpoly3d( pt, color->[0, 0.5, 0.5] );
+
+    // properties
+    addcollider3d();
+
+  end3d();
+
+  ///////////////////////////
+  // ball object
+  ball = begin3d( "ball" );
+    drawsphere3d( [0,0,0], 0.5, color->[1, 0, 0] );
+
+    // properties
+    addcollider3d();
+    usegravity3d( true );
+
+  end3d();
+
+  setposition3d( ball, [0,0,3] );
+
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop2')" /> </li>
+<li>Drag the viewer to rotate the camera.</li>
+</ol>
+
+<br>
+<h2> Object Oriented Programming #3:
+<br>
+"method"</h2>
+
+</h2>
+<p>
+code:
+</p>
+<pre class="code" id="oop3">
+
+  A.xy = [0,0.2];
+  B.xy = [0,-0.2];
+
+  ///////////////////////////
+  // axes object
+  begin3d( "axes" );
+    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
+    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
+    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
+  end3d();
+
+  ///////////////////////////
+  // plane object
+  begin3d( "plane" );
+    pt=[ [ 5, 5,0], [ 5,-5,0], [-5,-5,0], [-5, 5,0] ];
+    fillpoly3d( pt, color->[0, 0.5, 0.5] );
+
+    // properties
+    addcollider3d();
+
+  end3d();
+
+  ///////////////////////////
+  // ball object
+  begin3d( "ball" );
+    drawsphere3d( [0,0,0], 0.5, color->[1, 0, 0] );
+
+    // properties
+    addcollider3d();
+    usegravity3d( true );
+
+    // methods
+    startball() := (
+      setposition3d( [0,0,3] );
+    );
+    setstart3d( startball() );
+
+    updateball() := (
+      p = getposition3d();
+      p_1 =  6 - 12*(A.x-AL.x)/(AR.x-AL.x);
+      p_2 = -6 + 12*(B.x-BL.x)/(BR.x-BL.x);
+      setposition3d( p ); 
+    );
+    setupdate3d( updateball() );
+
+  end3d();
+
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop3')" /> </li>
+<li>Drag the viewer to rotate the camera.</li>
+<li>To move the ball, drag the point A and B.</li>
+</ol>
+
+<br>
+<h2> Object Oriented Programming #4:
+<br>
+"keyboard"</h2>
+
+</h2>
+<p>
+code:
+</p>
+<pre class="code" id="oop4">
+  ///////////////////////////
+  // axes object
+  begin3d( "axes" );
+    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
+    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
+    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
+  end3d();
+
+  ///////////////////////////
+  // plane object
+  begin3d( "plane" );
+    pt=[ [ 5, 5,0], [ 5,-5,0], [-5,-5,0], [-5, 5,0] ];
+    fillpoly3d( pt, color->[0, 0.5, 0.5] );
+
+    // properties
+    addcollider3d();
+
+  end3d();
+
+  ///////////////////////////
+  // ball object
+  begin3d( "ball" );
+    drawsphere3d( [0,0,0], 0.5, color->[1, 0, 0] );
+
+    // properties
+    addcollider3d();
+    usegravity3d( true );
+
+    // methods
+    startball() := (
+      setposition3d( [0,0,3] );
+    );
+    setstart3d( startball() );
+
+    updateball() := (
+      p = getposition3d();
+      if( getkey3d( "up" ),  p_1 = p_1 - 0.1; );
+      if( getkey3d( "down" ), p_1 = p_1 + 0.1; );
+      if( getkey3d( "left" ),  p_2 = p_2 - 0.1; );
+      if( getkey3d( "right" ), p_2 = p_2 + 0.1; );
+      setposition3d( p ); 
+    );
+    setupdate3d( updateball() );
+
+  end3d();
+
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop4')" /> </li>
+<li>Drag the viewer to rotate the camera.</li>
+<li>To move the ball, click the viewer and press the arrow keys.</li>
+</ol>
+
+<br>
+<h2> Object Oriented Programming #5:
+<br>
+"velocity and rotation"</h2>
+
+</h2>
+<p>
+code:
+</p>
+<pre class="code" id="oop5">
+  ///////////////////////////
+  // axes object
+  begin3d( "axes" );
+    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
+    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
+    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
+  end3d();
+
+  ///////////////////////////
+  // plane object
+  begin3d( "plane" );
+    pt=[ [ 5, 5,0], [ 5,-5,0], [-5,-5,0], [-5, 5,0] ];
+    fillpoly3d( pt, color->[0, 0.5, 0.5] );
+
+    // properties
+    addcollider3d();
+
+  end3d();
+
+  ///////////////////////////
+  // torus object
+  begin3d( "torus" );
+    n=600; 
+    p=3; 
+    q=8; 
+    pt=apply(0..n-1,i, w =i/n*2*pi; 
+      r=cos(q*w)+2; 
+      ( 0.2*sin(q*w), 0.2*r*cos(p*w), 0.2*r*sin(p*w) ) ); 
+    cl=apply(0..n,i, hue( i/n ); );
+    connect3d(pt,cl,size->1,topology->"close");
+
+    // properties
+    addcollider3d();
+    usegravity3d( true );
+
+    // methods
+    starttorus() := (
+      setposition3d( [0,-4,0.2] );
+      setvelocity3d( [0,4,8] );
+    );
+    setstart3d( starttorus() );
+
+    updatetorus() := (
+      setrotation3d( [0, 0, -angl/1°]);
+    );
+    setupdate3d( updatetorus() );
+
+  end3d();
+
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop5')" /> </li>
+<li>Drag the viewer to rotate the camera.</li>
+<li>To rotate the torus, rotate the point C.</li>
+</ol>
+
+<br>
+<h2> Object Oriented Programming #6:
+<br>
+"prototype and instantiate"</h2>
+
+</h2>
+<p>
+code:
+</p>
+<pre class="code" id="oop6">
+  ///////////////////////////
+  // axes object
+  begin3d( "axes" );
+    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
+    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
+    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
+  end3d();
+
+  ///////////////////////////
+  // plane object
+  begin3d( "plane" );
+    pt=[ [ 5, 5,0], [ 5,-5,0], [-5,-5,0], [-5, 5,0] ];
+    fillpoly3d( pt, color->[0, 0.5, 0.5] );
+
+    // properties
+    addcollider3d();
+
+  end3d();
+
+  ///////////////////////////
+  // prototype (invisible)
+  torus = createprototype3d( "torus" );
+    n=600; 
+    p=3; 
+    q=8; 
+    pt=apply(0..n-1,i, w =i/n*2*pi; 
+      r=cos(q*w)+2; 
+      ( 0.2*sin(q*w), 0.2*r*cos(p*w), 0.2*r*sin(p*w) ) ); 
+    cl=apply(0..n,i, hue( i/n ); );
+    connect3d(pt,cl,size->1,topology->"close");
+
+    // properties
+    addcollider3d();
+    usegravity3d( true );
+
+    // methods
+    starttorus() := (
+      setvelocity3d( [0,4,8] );
+    );
+    setstart3d( starttorus() );
+
+    updatetorus() := (
+      setrotation3d( [0, 0, -angl/1°]);
+    );
+    setupdate3d( updatetorus() );
+
+  end3d();
+
+  ///////////////////////////
+  // instantiate
+
+  instantiate3d( torus, [-1.5,  -4, 0.2] );
+  instantiate3d( torus, [   0,  -4, 0.2] );
+  instantiate3d( torus, [ 1.5,  -4, 0.2] );
+
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop6')" /> </li>
+<li>Drag the viewer to rotate the camera.</li>
+<li>To rotate the toruses, rotate the point C.</li>
+</ol>
+
+<br>
+<h2> Object Oriented Programming #7:
+<br>
+"inheriance and override"</h2>
+
+</h2>
+<p>
+code:
+</p>
+<pre class="code" id="oop7">
+  ///////////////////////////
+  // axes object
+  begin3d( "axes" );
+    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
+    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
+    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
+  end3d();
+
+  ///////////////////////////
+  // plane object
+  begin3d( "plane" );
+    pt=[ [ 5, 5,0], [ 5,-5,0], [-5,-5,0], [-5, 5,0] ];
+    fillpoly3d( pt, color->[0, 0.5, 0.5] );
+
+    // properties
+    addcollider3d();
+
+  end3d();
+
+  ///////////////////////////
+  // prototype (invisible)
+  torus = createprototype3d( "torus" );
+    n=600; 
+    p=3; 
+    q=8; 
+    pt=apply(0..n-1,i, w =i/n*2*pi; 
+      r=cos(q*w)+2; 
+      ( 0.2*sin(q*w), 0.2*r*cos(p*w), 0.2*r*sin(p*w) ) ); 
+    cl=apply(0..n,i, hue( i/n ); );
+    connect3d(pt,cl,size->1,topology->"close");
+
+    // properties
+    addcollider3d();
+    usegravity3d( true );
+
+    // methods
+    starttorus() := (
+      setvelocity3d( [0,4,8] );
+    );
+    setstart3d( starttorus() );
+
+    updatetorus() := (
+      setrotation3d( [0, 0, -angl/1°]);
+    );
+    setupdate3d( updatetorus() );
+
+  end3d();
+
+  ///////////////////////////
+  // inheriance and override
+  torus2 = extends3d( torus );
+
+    starttorus2() := (
+      setvelocity3d( [0,-4,8] );
+    );
+    setstart3d( starttorus2() );
+
+    updatetorus2() := (
+      setrotation3d( [0, 0, angl/1°*2]);
+    );
+    setupdate3d( updatetorus2() );
+
+  end3d();
+
+  ///////////////////////////
+  // instantiate
+
+  instantiate3d( torus, [-1.5,  -4, 0.2] );
+  instantiate3d( torus, [   0,  -4, 0.2] );
+  instantiate3d( torus, [ 1.5,  -4, 0.2] );
+
+  instantiate3d( torus2, [-1.5,  4, 0.2] );
+  instantiate3d( torus2, [   0,  4, 0.2] );
+  instantiate3d( torus2, [ 1.5,  4, 0.2] );
+
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop7')" /> </li>
+<li>Drag the viewer to rotate the camera.</li>
+<li>To rotate the toruses, rotate the point C.</li>
+</ol>
+
+<br>
+<h2>To be continued..</h2>
+
+</div>
+
+</body>
+</html>

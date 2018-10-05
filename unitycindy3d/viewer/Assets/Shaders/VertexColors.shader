@@ -1,0 +1,49 @@
+﻿/*
+Copyright (C) 2018 https://github.com/tmytokai/CindyJSPlugins
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+Shader "GeometricObject/VertexColors"
+{
+	// from Standard.shader in builtin_shaders-2018.*.zip
+    Properties 
+    {
+    	_Metallic ( "Metallic", Range(0.0, 1.0)) = 0.0
+        _Glossiness ( "Smoothness", Range(0.0, 1.0)) = 0.5
+
+		[ToggleOff] _SpecularHighlights( "Specular Highlights", Float) = 1.0
+		[ToggleOff] _GlossyReflections( "Reflections", Float) = 0.0
+    }
+
+    SubShader {
+
+    	Tags { "Queue"="Transparent" "RenderType"="Transparent" }
+		LOD 100
+
+		// renders the depth buffer
+		Pass {
+          ZWrite On
+          ColorMask 0
+        }
+
+        // renders the front
+        Cull Back
+		CGPROGRAM
+		#pragma surface surf_vert Standard alpha fullforwardshadows vertex:vert_vert
+		#include "Common.cginc"
+		ENDCG
+	}
+
+	FallBack "Diffuse"
+}

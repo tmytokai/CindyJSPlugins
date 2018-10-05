@@ -1,3 +1,11 @@
 tmp/
 build/
+Library/
+Packages/
+Temp/
+WebGL/
+obj/
+.vscode/
+*.sln
+*.csproj
 *~
