@@ -25,7 +25,7 @@ not supported
 
 ## Preparation
 
-    $ git clone https://github.com/tmytokay/CindyJSPlugins.git
+    $ git clone https://github.com/tmytokai/CindyJSPlugins.git
     $ cd CindyJSPlugins
     $ git clone https://github.com/CindyJS/CindyJS.git build
     $ patch -u build/make/build.js < make/build.js.patch
