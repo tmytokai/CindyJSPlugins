@@ -16,6 +16,7 @@ limitations under the License.
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using System.Runtime.InteropServices;
 
@@ -53,10 +54,18 @@ public class CindyJS : MonoBehaviour {
 		}
 
 		public void CopyObject( Manager manager, GEOOBJECT srcobj, Vector3 pos ){
+
 			className = srcobj.className;
+
 			var o = Instantiate ( srcobj.obj.gameObject, pos, Quaternion.identity );
 			o.name = className;
 			obj = o.GetComponent<GeometricObject>();
+
+			pointAppearance = new Stack<Appearance> ( srcobj.pointAppearance.Reverse() );
+
+			lineAppearance = new Stack<Appearance> ( srcobj.lineAppearance.Reverse() );
+
+			surfaceAppearance = new Stack<Appearance>( srcobj.surfaceAppearance.Reverse() );
 		}
 
 		public void Clear(){
@@ -95,6 +104,7 @@ public class CindyJS : MonoBehaviour {
 	private static extern void CollisionEnterCS( int objid1, string classname1, int objid2, string classname2 );
 
 	private Manager manager = null;
+	private float counter_status = 0;
 
 	private int MAX_OBJECTS = 256;
 	private Dictionary<string,int> dic_gobj;
@@ -138,7 +148,22 @@ public class CindyJS : MonoBehaviour {
 		#endif
 	}
 	
-	void Update () {}
+	void Update () {
+		if (Input.GetKeyDown (KeyCode.F4)) {
+			manager.StatusTextEnabled = !manager.StatusTextEnabled;
+		}
+		ShowStatus();
+	}
+
+	private void ShowStatus(){
+		if( !manager.StatusTextEnabled ) return;
+		counter_status -= Time.deltaTime;
+		if( counter_status < 0 ){
+			var fps = 1f/Time.deltaTime;
+			manager.StatusText = "fps: " + fps + "\nobjects: " + count_gobj + "/"+MAX_OBJECTS;
+			counter_status = 1f;
+		}
+	}
 
 	private GEOOBJECT init_drawing(){
 		if( idx_drawing < 0 ) return null;

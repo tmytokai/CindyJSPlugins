@@ -17,6 +17,7 @@ limitations under the License.
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 using System;
 using System.Threading;
@@ -28,6 +29,10 @@ public class Manager : MonoBehaviour {
 	public static SynchronizationContext context{ get; private set; } = null;
 	private Server server = null;
 	private Decoder decoder = null;
+
+	[SerializeField] private Text statusText = null;
+	public bool StatusTextEnabled { get{ return statusText.enabled; } set{ statusText.enabled = value;} }
+	public string StatusText {  get{ return statusText.text; } set{ statusText.text = value; } }
 
 	void Start () {
 
