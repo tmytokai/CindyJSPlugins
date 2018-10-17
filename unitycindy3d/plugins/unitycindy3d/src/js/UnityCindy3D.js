@@ -161,26 +161,27 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 	return begin3dImpl( coerce.toString(evaluate(args[0])), modifs, false );
     });
 
-    const begin3dImpl = function ( classname, modifs, active ){
+    const begin3dImpl = function ( name, modifs, active ){
 
 	if( thisid != -1 ) return nada;
 	if( initOperation() == false ) return nada;
 
 	setValue( active );
 
-	gameInstance.SendMessage ( 'Manager', 'Begin3D', classname );
+	gameInstance.SendMessage ( 'Manager', 'Begin3D', name );
 	thisid = Math.floor(uc3dBuffer[0]);
 
-	let gameobj = 
+	let obj = 
 	    {
 		id: thisid,
-		classname: classname,
+		name: { ctype: "string", value: name },
 		active: active,
 		init: false,
 		start: null,
-		update: null
+		update: null,
+		collisionenter: null
 	    };
-	gameobjs[thisid] = gameobj;
+	gameobjs[thisid] = obj;
 
 	return {
 	    "ctype": "number",
@@ -228,8 +229,8 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 
 	let id = coerce.toInt( evaluate(args[0] ) );
 
-	let obj = gameobjs[id];
-	if( obj ){
+	var obj_src = gameobjs[id];
+	if( obj_src ){
 
 	    setId( id );
 
@@ -240,16 +241,17 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 	    gameInstance.SendMessage ( 'Manager', 'Instantiate3D', "" );
 	    ret = Math.floor(uc3dBuffer[0]);
 
-	    let gameobj = 
+	    let obj = 
 		{
 		    id: ret,
-		    classname: obj.classname,
+		    name: obj_src.name,
 		    active: active,
 		    init: false,
-		    start: obj.start,
-		    update: obj.update
+		    start: obj_src.start,
+		    update: obj_src.update,
+    		    collisionenter: obj_src.collisionenter
 		};
-	    gameobjs[ret] = gameobj;
+	    gameobjs[ret] = obj;
 	}
 
 	return ret;
@@ -261,6 +263,26 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 	if( initOperation() == false ) return nada;
 
 	gameInstance.SendMessage ( 'Manager', 'End3D', "" );
+
+	thisid = -1;
+
+	return nada;
+    });
+
+    defOp("oncollisionenter3d", 2, function(args, modifs) {
+
+	let id1 = coerce.toInt( evaluate(args[0]) );
+	let id2 = coerce.toInt( evaluate(args[1]) );
+
+	let obj = gameobjs[id1];
+	if( ! obj ) return nada;
+
+	console.log( "oncollisionenter3d: id1 = " + id1 +  " / id2 = " + id2 );
+
+	if( obj.collisionenter != null ){
+	    thisid = obj.id;
+	    cdy.evokeCS( obj.collisionenter + "(" + id2 + ");" );
+	}
 
 	thisid = -1;
 
@@ -399,11 +421,11 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 	if( id == -1 ) return nada;
 	if( initOperation() == false ) return nada;
 
-	let gameobj = gameobjs[id];
-	if( ! gameobj ) return nada;
+	let obj = gameobjs[id];
+	if( ! obj ) return nada;
 
 	let act = coerce.toBool( evaluate(args[offset+1]) );
-	gameobj.active = act;
+	obj.active = act;
 
 	setId( id );
 
@@ -459,37 +481,70 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
     }
 
     //////////////////////////////////////////////////////////////////////
+    // Field handling functions
+
+    defOp("get3d", 1, function(args, modifs) {
+	return get3dImpl( thisid, args, 0, modifs );
+    });
+
+    defOp("get3d", 2, function(args, modifs) {
+	return get3dImpl( coerce.toInt( evaluate(args[0]) ), args, 1, modifs );
+    });
+
+    const get3dImpl = function ( id, args, offset, modifs ){
+
+	if( id == -1 ) return nada;
+	if( initOperation() == false ) return nada;
+
+	let obj = gameobjs[id];
+	if( ! obj ) return nada;
+
+	let key = coerce.toString( evaluate(args[offset]) );
+	if( obj[key] ) return obj[key];
+
+	return nada;
+    }
+
+    //////////////////////////////////////////////////////////////////////
     // Method handling functions
 
     defOp("setstart3d", 1, function(args, modifs) {
-	return setMethod( thisid, "start", args, 0, modifs );
+	return setMethod( thisid, "start", "();", args, 0, modifs );
     });
 
     defOp("setstart3d", 2, function(args, modifs) {
-	return setMethod( coerce.toInt( evaluate(args[0]) ), "start", args, 1, modifs );
+	return setMethod( coerce.toInt( evaluate(args[0]) ), "start", "();", args, 1, modifs );
     });
 
     defOp("setupdate3d", 1, function(args, modifs) {
-	return setMethod( thisid, "update", args, 0, modifs );
+	return setMethod( thisid, "update", "();", args, 0, modifs );
     });
 
     defOp("setupdate3d", 2, function(args, modifs) {
-	return setMethod( coerce.toInt( evaluate(args[0]) ), "update", args, 1, modifs );
+	return setMethod( coerce.toInt( evaluate(args[0]) ), "update", "();", args, 1, modifs );
     });
 
-    const setMethod = function ( id, method, args, offset, modifs ){
+    defOp("setcollisionenter3d", 1, function(args, modifs) {
+	return setMethod( thisid, "collisionenter", "", args, 0, modifs );
+    });
+
+    defOp("setcollisionenter3d", 2, function(args, modifs) {
+	return setMethod( coerce.toInt( evaluate(args[0]) ), "collisionenter", "", args, 1, modifs );
+    });
+
+    const setMethod = function ( id, method, newtxt, args, offset, modifs ){
 
 	if( id == -1 ) return nada;
 
-	let gameobj = gameobjs[id];
-	if( ! gameobj ) return nada;
+	let obj = gameobjs[id];
+	if( ! obj ) return nada;
 
 	if (args[offset]["ctype"] !== "function") {
 	    console.log("argument is not a function");
 	    return nada;
 	};
 
-        gameobj[ method ] = args[offset]["oper"].replace( "$0", "();" );
+        obj[ method ] = args[offset]["oper"].replace( /\$.*/g, newtxt );
 
 	return nada;
     }
@@ -511,6 +566,8 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 		}
 	    }
 	});
+
+	thisid = -1;
 
 	return nada;
     });

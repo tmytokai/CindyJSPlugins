@@ -23,6 +23,7 @@ using System.Linq;
 public class GeometricObject : MonoBehaviour 
 {
 	public int id{ get; set; } = -1;
+	public System.Action<int,int> collisionEnterCallback { get; set; } = null;
 	public System.Action<int> destroyCallback { get; set; } = null;
 	public bool rendering{ get; set; }
 	public bool initialized{ get; private set; }
@@ -100,6 +101,14 @@ public class GeometricObject : MonoBehaviour
 		mp = new MeshPrimitive ();
 		primitives.Add (mp);
 	}
+
+    void OnCollisionEnter( Collision col ) {
+	
+		if( collisionEnterCallback != null ){
+			GeometricObject obj = col.gameObject.GetComponent<GeometricObject>();
+			if(obj != null) collisionEnterCallback(id,obj.id);
+		}
+    }
 
 	private void OnDestroy()
     {

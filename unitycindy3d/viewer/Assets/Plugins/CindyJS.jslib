@@ -12,9 +12,8 @@ mergeInto( LibraryManager.library,
     onDestroyCS( id );
   },
 
-  CollisionEnterCS: function( objid1, objclass1, objid2, objclass2 ) {
-    console.log( "OnCollisionEnterCindyJS " +objclass1 + ":" +objid1 + " " +objclass2 + ":" + objid2 );
-    collisionEnterCS( objid1, objclass1, objid2, objclass2 );
+  OnCollisionEnterCS: function( id1, id2 ) {
+    onCollisionEnterCS( id1, id2 );
   },
 }
 );

@@ -53,7 +53,7 @@ public class CindyJS : MonoBehaviour {
 	private static extern void OnDestroyCS( int id );
 
 	[DllImport("__Internal")]
-	private static extern void CollisionEnterCS( int objid1, string classname1, int objid2, string classname2 );
+	private static extern void OnCollisionEnterCS( int id1, int id2 );
 
 	[SerializeField] private GameObject GeometricObjectPrefab;
 
@@ -78,7 +78,7 @@ public class CindyJS : MonoBehaviour {
 	private int idx_uc3dBuffer;
 
 	private bool testmode = false;
-	private float[] id_test = {-1,-1};
+	private int[] id_test = {-1,-1,-1};
 
 	void Start () {
 
@@ -100,117 +100,167 @@ public class CindyJS : MonoBehaviour {
 	}
 	
 	void Update () {
-		if (Input.GetKeyDown (KeyCode.F3)) {
+		if (Input.GetKeyDown (KeyCode.F4)) {
 			testmode = !testmode;
 			statusText.enabled = testmode;
 			counter_status = 0;
+		}		
+		if( testmode ){
+			TestMode();
 		}
-		if (Input.GetKeyDown (KeyCode.F4)) {
-			statusText.enabled = !statusText.enabled;
-			counter_status = 0;
-		}
-		
-		if( testmode ) TestMode();
-		if( statusText.enabled ) ShowStatus();
 	}
 
 	private void TestMode(){
 
+		System.Func<int,string,int> begin = (idx,name) => {
+			idx_uc3dBuffer = 0;
+			uc3dBuffer[idx_uc3dBuffer++] = 1f; // active
+			Begin3D( name );
+			id_test[idx] = (int)uc3dBuffer[0];
+			return id_test[idx];
+		};
+
+		System.Action end = () =>{
+			End3D();
+		};
+
+		System.Action<int> destroy = (idx) => {
+			idx_uc3dBuffer = 0;
+			uc3dBuffer[idx_uc3dBuffer++] = id_test[idx];
+			uc3dBuffer[idx_uc3dBuffer++] = 0f; // sec
+			Destroy3D();
+			id_test[idx] = -1;
+		};
+
+		System.Action<int> addcol = (id) => {
+			idx_uc3dBuffer = 0;
+			uc3dBuffer[idx_uc3dBuffer++] = id;
+			AddCollider3D();
+		};
+
+		System.Action<int,float,float,float> setpos = (id,x,y,z) => {
+			idx_uc3dBuffer = 0;
+			uc3dBuffer[idx_uc3dBuffer++] = id;
+			uc3dBuffer[idx_uc3dBuffer++] = 1f;
+			uc3dBuffer[idx_uc3dBuffer++] = x;
+			uc3dBuffer[idx_uc3dBuffer++] = y;
+			uc3dBuffer[idx_uc3dBuffer++] = z;
+			SetPosition3D();
+		};
+
+		System.Action<int,float,float,float> setvel = (id,x,y,z) => {
+			idx_uc3dBuffer = 0;
+			uc3dBuffer[idx_uc3dBuffer++] = id;
+			uc3dBuffer[idx_uc3dBuffer++] = 1f;
+			uc3dBuffer[idx_uc3dBuffer++] = x;
+			uc3dBuffer[idx_uc3dBuffer++] = y;
+			uc3dBuffer[idx_uc3dBuffer++] = z;
+			SetVelocity3D();
+		};
+
+		System.Action<int, float,float,float,float> sphere = (id, radius,r,g,b) => {
+
+			idx_uc3dBuffer = 0;
+			uc3dBuffer[idx_uc3dBuffer++] = 1f;
+			uc3dBuffer[idx_uc3dBuffer++] = 0f; //x
+			uc3dBuffer[idx_uc3dBuffer++] = 0f; //y
+			uc3dBuffer[idx_uc3dBuffer++] = 0f; //z
+
+			uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Radius;
+			uc3dBuffer[idx_uc3dBuffer++] = radius; 
+
+			uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Color;
+			uc3dBuffer[idx_uc3dBuffer++] = r;
+			uc3dBuffer[idx_uc3dBuffer++] = g;
+			uc3dBuffer[idx_uc3dBuffer++] = b;
+
+			uc3dBuffer[idx_uc3dBuffer++] = -1f;
+
+			AddSphere3D();
+		};
+
+		System.Action<int> torus = (id) =>{
+
+			var n = 600;
+			var p = 3f;
+			var q = 8f;
+
+			idx_uc3dBuffer = 0;
+			uc3dBuffer[idx_uc3dBuffer++] = (float)n;
+			for( var i = 0; i< n; ++i ){
+				var w = 2f * Mathf.PI * (float)i / n;
+				var r = Mathf.Cos (q * w) + 2f;
+				uc3dBuffer[idx_uc3dBuffer++] = Mathf.Sin (q * w); //x
+				uc3dBuffer[idx_uc3dBuffer++] = r * Mathf.Cos (p * w); //y
+				uc3dBuffer[idx_uc3dBuffer++] = r * Mathf.Sin (p * w); //z
+			}
+
+			uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Colors;
+			uc3dBuffer[idx_uc3dBuffer++] = (float)(n+1);
+			for (var i = 0; i < n+1; ++i) {
+				var	hue = (float)i / n;
+				var cl = Color.HSVToRGB (hue, 1f, 1f);
+				uc3dBuffer[idx_uc3dBuffer++] = cl.r; // r
+				uc3dBuffer[idx_uc3dBuffer++] = cl.g; // g
+				uc3dBuffer[idx_uc3dBuffer++] = cl.b; // b
+			}
+
+			uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Radius;
+			uc3dBuffer[idx_uc3dBuffer++] = 4f; 
+
+			uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Topology;
+			uc3dBuffer[idx_uc3dBuffer++] = (float)TOPOLOGY.Close;
+
+			uc3dBuffer[idx_uc3dBuffer++] = -1f;
+
+			AddLine3D();
+		};
+
 		if ( Input.GetKeyDown (KeyCode.S) ) {
-			if( id_test[0] == -1f ){
-
-				idx_uc3dBuffer = 0;
-				uc3dBuffer[idx_uc3dBuffer++] = 1f; // active
-				Begin3D( "Test_Sphere" );
-				id_test[0] = uc3dBuffer[0];
-
-				idx_uc3dBuffer = 0;
-				uc3dBuffer[idx_uc3dBuffer++] = 1f;
-				uc3dBuffer[idx_uc3dBuffer++] = 2f; //x
-				uc3dBuffer[idx_uc3dBuffer++] = 0f; //y
-				uc3dBuffer[idx_uc3dBuffer++] = 0f; //z
-
-				uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Radius;
-				uc3dBuffer[idx_uc3dBuffer++] = 0.5f; 
-
-				uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Color;
-				uc3dBuffer[idx_uc3dBuffer++] = 1f; // r
-				uc3dBuffer[idx_uc3dBuffer++] = 1f; // g
-				uc3dBuffer[idx_uc3dBuffer++] = 1f; // b
-
-				uc3dBuffer[idx_uc3dBuffer++] = -1f;
-				AddSphere3D();
-
-				End3D();				
+			var idx = 0;
+			if( id_test[idx] == -1f ){
+				var id = begin(idx, "Test_Sphere");				
+				sphere(id, 0.5f, 1f, 1f, 1f);
+				addcol(id);
+				end();
+				setpos(id, 2f, 0f, 0f);
 			}
 			else{
-				idx_uc3dBuffer = 0;
-				uc3dBuffer[idx_uc3dBuffer++] = id_test[0]; // id
-				uc3dBuffer[idx_uc3dBuffer++] = 0f; // sec
-				Destroy3D();
-				id_test[0] = -1;
+				destroy(idx);
 			}
 		}
 		if ( Input.GetKeyDown (KeyCode.T) ) {
-			if( id_test[1] == -1f ){
-
-				idx_uc3dBuffer = 0;
-				uc3dBuffer[idx_uc3dBuffer++] = 1f; // active
-				Begin3D( "Test_Torus" );
-				id_test[1] = uc3dBuffer[0];
-
-				var n = 600;
-				var p = 3f;
-				var q = 8f;
-
-				idx_uc3dBuffer = 0;
-				uc3dBuffer[idx_uc3dBuffer++] = (float)n;
-				for( var i = 0; i< n; ++i ){
-					var w = 2f * Mathf.PI * (float)i / n;
-					var r = Mathf.Cos (q * w) + 2f;
-					uc3dBuffer[idx_uc3dBuffer++] = Mathf.Sin (q * w); //x
-					uc3dBuffer[idx_uc3dBuffer++] = r * Mathf.Cos (p * w); //y
-					uc3dBuffer[idx_uc3dBuffer++] = r * Mathf.Sin (p * w); //z
-				}
-
-				uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Colors;
-				uc3dBuffer[idx_uc3dBuffer++] = (float)(n+1);
-				for (var i = 0; i < n+1; ++i) {
-					var	hue = (float)i / n;
-					var cl = Color.HSVToRGB (hue, 1f, 1f);
-					uc3dBuffer[idx_uc3dBuffer++] = cl.r; // r
-					uc3dBuffer[idx_uc3dBuffer++] = cl.g; // g
-					uc3dBuffer[idx_uc3dBuffer++] = cl.b; // b
-				}
-
-				uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Radius;
-				uc3dBuffer[idx_uc3dBuffer++] = 4f; 
-
-				uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Topology;
-				uc3dBuffer[idx_uc3dBuffer++] = (float)TOPOLOGY.Close;
-
-				uc3dBuffer[idx_uc3dBuffer++] = -1f;
-
-				AddLine3D();
-
-				End3D();				
+			var idx = 1;
+			if( id_test[idx] == -1f ){
+				var id = begin(idx,"Test_Torus");
+				torus(id);
+				addcol(id);
+				end();
+				setpos(id,-2f,0f,0f);
 			}
 			else{
-				idx_uc3dBuffer = 0;
-				uc3dBuffer[idx_uc3dBuffer++] = id_test[1]; // id
-				uc3dBuffer[idx_uc3dBuffer++] = 0f; // sec
-				Destroy3D();
-				id_test[1] = -1;
+				destroy(idx);
 			}
 		}
-	}
-
-	private void ShowStatus(){
+		if ( Input.GetKeyDown (KeyCode.B) ) {
+			var idx = 2;
+			if( id_test[idx] == -1f ){
+				var id = begin(idx, "Test_Ball");
+				sphere(id, 0.1f, 1f, 0f, 0f);
+				addcol(id);
+				end();
+				setpos(id,4f,0f,0f);
+				setvel(id,-1f,0f,0f);
+			}
+			else{
+				destroy(idx);
+			}
+		}
 
 		counter_status -= Time.deltaTime;
 		if( counter_status < 0 ){
 			var fps = 1f/Time.deltaTime;
-			statusText.text =  (testmode ? "- Test Mode -\n\n": "") + "fps: " + fps + "\nobjects: " + gobjs.Count;
+			statusText.text =  "- Test Mode -\n\nfps: " + fps + "\nobjects: " + gobjs.Count;
 			counter_status = 1f;
 		}
 	}
@@ -319,13 +369,22 @@ public class CindyJS : MonoBehaviour {
 		
 		var gobj = obj.GetComponent<GeometricObject>();
 		gobj.id = id_head;
+		gobj.collisionEnterCallback = (id1,id2) =>{
+       		if ( gobjs[id1] != null && gobjs[id2] != null ){
+				if( testmode ) Manager.DebugLog( "CindyJS::registerGobj : collisionEnterCallback " + id1 + " -> " + id2 );	
+				#if !UNITY_EDITOR
+            	OnCollisionEnterCS(id1,id2);
+				#endif
+				counter_status = 0;
+        	}
+		};
 		gobj.destroyCallback = (id) =>{
        		if (gobjs[id] != null){
 				if( testmode ) Manager.DebugLog( "CindyJS::registerGobj : destroyCallback " + id );	
 				gobjs.Remove(id);
 				#if !UNITY_EDITOR
             	OnDestroyCS(id);
-				#endif				
+				#endif
 				counter_status = 0;
         	}
 		};

@@ -62,6 +62,11 @@
             } );
   };
 
+  const onCollisionEnterCS = function (id1,id2)
+  {
+    if( cdy != null ) cdy.evokeCS( "oncollisionenter3d("+id1+","+id2+");" );
+  }
+
   const onDestroyCS = function (id)
   {
     if( cdy != null ) cdy.evokeCS( "ondestroy3d("+id+");" );
@@ -127,8 +132,7 @@ Last updated: 5 October 2018
 <ul>
 <li>Drag the viewer to rotate the camera.</li>
 <li>Click the viewer to give key focus to the viewer.</li>
-<li>Click the viewer and press F4 key to show/hide the status monitor.</li>
-<li>Click the viewer and press F3 key to enter/exit the test mode. <br> In the test mode, press s key to show/hide a sphere. <br>Press t to show/hide a torus. </li>
+<li>Click the viewer and press F4 key to enter/exit the test mode. <br> In the test mode, press s key to show/hide a sphere. <br>Press t to show/hide a torus. <br>Press b key to throw a ball.</li>
 </ul>
 </p>
 
@@ -744,41 +748,106 @@ code:
 
   ///////////////////////////
   // prototype (invisible)
-  torus = createprototype3d( "torus" );
-    n=600; 
-    p=3; 
-    q=8; 
-    pt=apply(0..n-1,i, w =i/n*2*pi; 
-      r=cos(q*w)+2; 
-      ( 0.2*sin(q*w), 0.2*r*cos(p*w), 0.2*r*sin(p*w) ) ); 
-    cl=apply(0..n,i, hue( i/n ); );
-    connect3d(pt,cl,size->1,topology->"close");
+  ball = createprototype3d( "ball" );
+    drawsphere3d( [0,0,0], 0.2, color->[1, 0, 0] );
 
     // properties
     addcollider3d();
     usegravity3d( true );
 
     // methods
-    starttorus() := (
+    startball() := (
       setvelocity3d( [0,4,8] );
       sec = 2+random(3);
       destroy3d( sec ); // destroy this object after sec seconds
     );
-    setstart3d( starttorus() );
+    setstart3d( startball() );
 
   end3d();
 
   ///////////////////////////
   // instantiate
 
-  instantiate3d( torus, [-1.5,  -4, 0.2] );
-  instantiate3d( torus, [   0,  -4, 0.2] );
-  instantiate3d( torus, [ 1.5,  -4, 0.2] );
+  instantiate3d( ball, [-1.5,  -4, 0.4] );
+  instantiate3d( ball, [   0,  -4, 0.4] );
+  instantiate3d( ball, [ 1.5,  -4, 0.4] );
 </pre>
 <ol>
 <li>Push <input type="button" value="Run" onclick="runButtonClicked('oop8')" /> </li>
 </ol>
 
+
+<br>
+<h2> Object Oriented Programming #9:
+<br>
+"collision"</h2>
+<p>
+code:
+</p>
+<pre class="code" id="oop9">
+ ///////////////////////////
+  // axes object
+  begin3d( "axes" );
+    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
+    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
+    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
+  end3d();
+
+  ///////////////////////////
+  // plane object
+  begin3d( "plane" );
+    pt=[ [ 5, 5,0], [ 5,-5,0], [-5,-5,0], [-5, 5,0] ];
+    fillpoly3d( pt, color->[0, 0.5, 0.5] );
+
+    // properties
+    addcollider3d();
+
+    // methods
+    collisionenterplane( hitobj ) := (
+       if( get3d(hitobj,"name") == "redball",  // get3d is the getter of a field value
+          destroy3d( hitobj, 0 ); 
+        );
+       if( get3d(hitobj,"name") == "blueball",
+          setvelocity3d( hitobj, [0,4,8] );
+        );
+    );
+    setcollisionenter3d( collisionenterplane() );
+
+  end3d();
+
+  ///////////////////////////
+  // prototype (invisible)
+  redball = createprototype3d( "redball" );
+    drawsphere3d( [0,0,0], 0.2, color->[1, 0, 0] );
+
+    // properties
+    addcollider3d();
+    usegravity3d( true );
+
+  end3d();
+
+  ///////////////////////////
+  // prototype (invisible)
+  blueball = createprototype3d( "blueball" );
+    drawsphere3d( [0,0,0], 0.2, color->[0, 0, 1] );
+
+    // properties
+    addcollider3d();
+    usegravity3d( true );
+
+  end3d();
+
+  ///////////////////////////
+  // instantiate
+
+  instantiate3d( redball,  [-1,  0, 2] );
+  instantiate3d( blueball, [ 0,  0, 4] );
+  instantiate3d( redball,  [ 1,  0, 6] );
+  instantiate3d( blueball, [ 2,  0, 8] );
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop9')" /> </li>
+</ol>
 
 <br>
 <h2>To be continued..</h2>
