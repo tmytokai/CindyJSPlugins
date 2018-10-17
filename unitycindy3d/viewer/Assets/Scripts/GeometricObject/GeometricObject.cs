@@ -22,12 +22,18 @@ using System.Linq;
 
 public class GeometricObject : MonoBehaviour 
 {
+	public int id{ get; set; } = -1;
+	public System.Action<int> destroyCallback { get; set; } = null;
+	public bool rendering{ get; set; }
+	public bool initialized{ get; private set; }
+
+	public Stack<Appearance> pointAppearance{ get; set; } = null;
+	public Stack<Appearance> lineAppearance{ get; set; } = null;
+	public Stack<Appearance> surfaceAppearance{ get; set; } = null;
+
 	public Material material_singleSided;
 	public Material material_doubleSided;
 	public Material material_vertexColors;
-
-	public bool rendering{ get; set; }
-	public bool initialized{ get; private set; }
 
 	private List<PrimitiveBase> primitives;
 	private PointPrimitive ptp;
@@ -68,6 +74,15 @@ public class GeometricObject : MonoBehaviour
 		rendering = false;
 		initialized = false;
 
+		pointAppearance = new Stack<Appearance> ();
+		pointAppearance.Push (new Appearance (Color.red, Color.red, 60f, 1f, 1f));
+
+		lineAppearance = new Stack<Appearance> ();
+		lineAppearance.Push (new Appearance (Color.blue, Color.blue, 60f, 1f, 1f));
+
+		surfaceAppearance = new Stack<Appearance> ();			
+		surfaceAppearance.Push (new Appearance (Color.green, Color.grey, 60f, 1f, 1f));
+
 		primitives = new List<PrimitiveBase> ();
 
 		ptp = new PointPrimitive ();
@@ -86,6 +101,11 @@ public class GeometricObject : MonoBehaviour
 		primitives.Add (mp);
 	}
 
+	private void OnDestroy()
+    {
+		if( destroyCallback != null ) destroyCallback(id);		
+    }
+	
 	public void Begin()
 	{
 		foreach (var prim in primitives) {

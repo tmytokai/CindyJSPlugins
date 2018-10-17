@@ -55,8 +55,8 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 	uc3dBuffer[idx_uc3dBuffer++] = id;
     }
 
-    const setBoolean = function ( bl ){
-	uc3dBuffer[idx_uc3dBuffer++] = bl;
+    const setValue = function ( val ){
+	uc3dBuffer[idx_uc3dBuffer++] = val;
     }
 
     const setPointsFromArgs = function ( args, offset, pointssize ) {
@@ -166,7 +166,7 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 	if( thisid != -1 ) return nada;
 	if( initOperation() == false ) return nada;
 
-	setBoolean( active );
+	setValue( active );
 
 	gameInstance.SendMessage ( 'Manager', 'Begin3D', classname );
 	thisid = Math.floor(uc3dBuffer[0]);
@@ -180,7 +180,7 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 		start: null,
 		update: null
 	    };
-	gameobjs.push( gameobj );
+	gameobjs[thisid] = gameobj;
 
 	return {
 	    "ctype": "number",
@@ -228,31 +228,29 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 
 	let id = coerce.toInt( evaluate(args[0] ) );
 
-	gameobjs.forEach( obj => {
+	let obj = gameobjs[id];
+	if( obj ){
 
-	    if( obj.id == id ){
+	    setId( id );
 
-		setId( id );
+	    setValue( active );
 
-		setBoolean( active );
+	    if( active ) setPointsFromArgs( args, 1, 1 );
 
-		if( active ) setPointsFromArgs( args, 1, 1 );
+	    gameInstance.SendMessage ( 'Manager', 'Instantiate3D', "" );
+	    ret = Math.floor(uc3dBuffer[0]);
 
-		gameInstance.SendMessage ( 'Manager', 'Instantiate3D', "" );
-		ret = Math.floor(uc3dBuffer[0]);
-
-		let gameobj = 
-		    {
-			id: ret,
-			classname: obj.classname,
-			active: active,
-			init: false,
-			start: obj.start,
-			update: obj.update
-		    };
-		gameobjs.push( gameobj );
-	    }
-	} );
+	    let gameobj = 
+		{
+		    id: ret,
+		    classname: obj.classname,
+		    active: active,
+		    init: false,
+		    start: obj.start,
+		    update: obj.update
+		};
+	    gameobjs[ret] = gameobj;
+	}
 
 	return ret;
     }
@@ -266,6 +264,38 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 
 	thisid = -1;
 
+	return nada;
+    });
+
+    defOp("destroy3d", 1, function(args, modifs) {
+	return destroy3dImpl( thisid, args, 0, modifs );
+    });
+
+    defOp("destroy3d", 2, function(args, modifs) {
+	return destroy3dImpl( coerce.toInt( evaluate(args[0]) ), args, 1, modifs );
+    });
+
+    const destroy3dImpl = function ( id, args, offset, modifs ){
+
+	if( id == -1 ) return nada;
+	if( initOperation() == false ) return nada;
+
+	let sec = coerce.toReal( evaluate(args[offset]) );
+
+	setId( id );
+
+	setValue( sec );
+
+	gameInstance.SendMessage ( 'Manager', 'Destroy3D', "" );
+
+	return nada;
+    }
+
+    defOp("ondestroy3d", 1, function(args, modifs) {
+
+	let id = coerce.toInt( evaluate(args[0]) );
+	delete gameobjs[id];
+	console.log( "ondestroy3d: id = " + id +  " / gameobjs.length = " + Object.keys(gameobjs).length );
 	return nada;
     });
 
@@ -369,16 +399,15 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 	if( id == -1 ) return nada;
 	if( initOperation() == false ) return nada;
 
-	let gameobj = null;
-	gameobjs.forEach( obj => { if( obj.id == id ) gameobj = obj; } );
-	if( gameobj == null ) return nada;
+	let gameobj = gameobjs[id];
+	if( ! gameobj ) return nada;
 
 	let act = coerce.toBool( evaluate(args[offset+1]) );
 	gameobj.active = act;
 
 	setId( id );
 
-	setBoolean( act, null );
+	setValue( act );
 
 	gameInstance.SendMessage ( 'Manager', 'SetActive3D', "" );
 
@@ -398,9 +427,11 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 	if( id == -1 ) return nada;
 	if( initOperation() == false ) return nada;
 
+	let usegrv = coerce.toBool( evaluate(args[offset]) );
+
 	setId( id );
 
-	setBoolean( coerce.toBool( evaluate(args[offset]) ), null );
+	setValue( usegrv );
 
 	gameInstance.SendMessage ( 'Manager', 'UseGravity3D', "" );
 
@@ -450,9 +481,8 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 
 	if( id == -1 ) return nada;
 
-	let gameobj = null;
-	gameobjs.forEach( obj => { if( obj.id == id ) gameobj = obj; } );
-	if( gameobj == null ) return nada;
+	let gameobj = gameobjs[id];
+	if( ! gameobj ) return nada;
 
 	if (args[offset]["ctype"] !== "function") {
 	    console.log("argument is not a function");
@@ -469,7 +499,6 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 	if( cdy == null ) return nada;
 
 	gameobjs.forEach( obj => {
-	    
 	    if( obj.active ){
 		if( ! obj.init && obj.start != null ){
 		    thisid = obj.id;

@@ -20,6 +20,7 @@ using UnityEngine;
 
 public class StandAloneSample : MonoBehaviour {
 
+/* 
 	public GameObject GeometricObjectPrefab;
 
 	private GameObject sphere = null;
@@ -66,6 +67,7 @@ public class StandAloneSample : MonoBehaviour {
 				enneper = null;
 			}
 		}
+
 	}
 
 	void Sphere ( GeometricObject obj ){
@@ -166,5 +168,5 @@ public class StandAloneSample : MonoBehaviour {
 		obj.AddMesh( rows, cols, points, idxs );
 		obj.End ();
 	}
-
+*/
 }

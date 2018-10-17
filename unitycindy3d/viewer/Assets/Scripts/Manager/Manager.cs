@@ -17,46 +17,17 @@ limitations under the License.
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 using System;
 using System.Threading;
 
 public class Manager : MonoBehaviour {
 
-	public GameObject GeometricObjectPrefab;
-
 	public static SynchronizationContext context{ get; private set; } = null;
-	private Server server = null;
-	private Decoder decoder = null;
 
-	[SerializeField] private Text statusText = null;
-	public bool StatusTextEnabled { get{ return statusText.enabled; } set{ statusText.enabled = value;} }
-	public string StatusText {  get{ return statusText.text; } set{ statusText.text = value; } }
+	void Start () {}
 
-	void Start () {
-
-	#if !UNITY_WEBGL
-		context = SynchronizationContext.Current;
-		decoder = new Decoder (gameObject.GetComponent<Manager> ());
-		server = new Server (decoder);
-	#endif
-	}
-
-	void Update () {
-	}
-
-	void OnApplicationQuit ()
-	{
-		if( server != null ){
-			server.Quit ();
-			decoder.Quit ();
-		}
-	}
-
-	public GameObject InstantiateGeometricObject(){
-		return Instantiate (GeometricObjectPrefab);
-	}
+	void Update () {}
 
 	public static void DebugLog ( object message )
 	{

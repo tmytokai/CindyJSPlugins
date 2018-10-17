@@ -18,63 +18,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 using System.Runtime.InteropServices;
 
 public class CindyJS : MonoBehaviour {
 
 #if UNITY_WEBGL
-
-	private class GEOOBJECT {
-
-		public string className;
-		public GeometricObject obj = null;
-		public Stack<Appearance> pointAppearance = null;
-		public Stack<Appearance> lineAppearance = null;
-		public Stack<Appearance> surfaceAppearance = null;
-
-		public GEOOBJECT(  ){
-		} 
-		
-		public void CreateObject( Manager manager, string _name ){
-
-			className = _name;
-
-			var o = manager.InstantiateGeometricObject();
-			o.name = className;
-			obj = o.GetComponent<GeometricObject>();
-
-			pointAppearance = new Stack<Appearance> ();
-			pointAppearance.Push (new Appearance (Color.red, Color.red, 60f, 1f, 1f));
-
-			lineAppearance = new Stack<Appearance> ();
-			lineAppearance.Push (new Appearance (Color.blue, Color.blue, 60f, 1f, 1f));
-
-			surfaceAppearance = new Stack<Appearance> ();			
-			surfaceAppearance.Push (new Appearance (Color.green, Color.grey, 60f, 1f, 1f));
-		}
-
-		public void CopyObject( Manager manager, GEOOBJECT srcobj, Vector3 pos ){
-
-			className = srcobj.className;
-
-			var o = Instantiate ( srcobj.obj.gameObject, pos, Quaternion.identity );
-			o.name = className;
-			obj = o.GetComponent<GeometricObject>();
-
-			pointAppearance = new Stack<Appearance> ( srcobj.pointAppearance.Reverse() );
-
-			lineAppearance = new Stack<Appearance> ( srcobj.lineAppearance.Reverse() );
-
-			surfaceAppearance = new Stack<Appearance>( srcobj.surfaceAppearance.Reverse() );
-		}
-
-		public void Clear(){
-			if( obj != null ) Destroy( obj.gameObject );
-			if( pointAppearance != null ) pointAppearance.Clear();
-			if( lineAppearance != null ) lineAppearance.Clear();
-			if( surfaceAppearance != null ) surfaceAppearance.Clear();
-		}
-	};
 
 	private enum MODIFIERS : byte
 	{
@@ -101,24 +50,25 @@ public class CindyJS : MonoBehaviour {
 	private static extern void StartCS();
 
 	[DllImport("__Internal")]
+	private static extern void OnDestroyCS( int id );
+
+	[DllImport("__Internal")]
 	private static extern void CollisionEnterCS( int objid1, string classname1, int objid2, string classname2 );
 
-	private Manager manager = null;
+	[SerializeField] private GameObject GeometricObjectPrefab;
+
+	[SerializeField] private Text statusText = null;
 	private float counter_status = 0;
 
-	private int MAX_OBJECTS = 256;
-	private Dictionary<string,int> dic_gobj;
-	private GEOOBJECT[] gObj;
-	private int idx_drawing = -1;
-	private int head_gobj = 0;
-	private int count_gobj = 0;
+	private Dictionary<int,GeometricObject> gobjs;
+	private int id_head = 0;
+	private GeometricObject gobj_drawing = null;
 
 	private List<Vector3> points;
 	private List<Vector3> angles;
 	private float radius;
 	private Color32 frontColor;
 	private List<Color32> frontColors ;
-	private Color32 backColor;
 	private TOPOLOGY topology;
 
 	private float POINT_SCALE = 0.05f;
@@ -127,11 +77,12 @@ public class CindyJS : MonoBehaviour {
 	private float[] uc3dBuffer;
 	private int idx_uc3dBuffer;
 
-	void Start () {
-		manager = gameObject.GetComponent<Manager> ();
+	private bool testmode = false;
+	private float[] id_test = {-1,-1};
 
-		dic_gobj = new Dictionary<string,int> ();
-		gObj = new GEOOBJECT[MAX_OBJECTS];
+	void Start () {
+
+		gobjs = new Dictionary<int, GeometricObject>();
 
 		points = new List<Vector3> ();
 		angles = new List<Vector3> ();
@@ -149,38 +100,140 @@ public class CindyJS : MonoBehaviour {
 	}
 	
 	void Update () {
-		if (Input.GetKeyDown (KeyCode.F4)) {
-			manager.StatusTextEnabled = !manager.StatusTextEnabled;
+		if (Input.GetKeyDown (KeyCode.F3)) {
+			testmode = !testmode;
+			statusText.enabled = testmode;
+			counter_status = 0;
 		}
-		ShowStatus();
+		if (Input.GetKeyDown (KeyCode.F4)) {
+			statusText.enabled = !statusText.enabled;
+			counter_status = 0;
+		}
+		
+		if( testmode ) TestMode();
+		if( statusText.enabled ) ShowStatus();
+	}
+
+	private void TestMode(){
+
+		if ( Input.GetKeyDown (KeyCode.S) ) {
+			if( id_test[0] == -1f ){
+
+				idx_uc3dBuffer = 0;
+				uc3dBuffer[idx_uc3dBuffer++] = 1f; // active
+				Begin3D( "Test_Sphere" );
+				id_test[0] = uc3dBuffer[0];
+
+				idx_uc3dBuffer = 0;
+				uc3dBuffer[idx_uc3dBuffer++] = 1f;
+				uc3dBuffer[idx_uc3dBuffer++] = 2f; //x
+				uc3dBuffer[idx_uc3dBuffer++] = 0f; //y
+				uc3dBuffer[idx_uc3dBuffer++] = 0f; //z
+
+				uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Radius;
+				uc3dBuffer[idx_uc3dBuffer++] = 0.5f; 
+
+				uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Color;
+				uc3dBuffer[idx_uc3dBuffer++] = 1f; // r
+				uc3dBuffer[idx_uc3dBuffer++] = 1f; // g
+				uc3dBuffer[idx_uc3dBuffer++] = 1f; // b
+
+				uc3dBuffer[idx_uc3dBuffer++] = -1f;
+				AddSphere3D();
+
+				End3D();				
+			}
+			else{
+				idx_uc3dBuffer = 0;
+				uc3dBuffer[idx_uc3dBuffer++] = id_test[0]; // id
+				uc3dBuffer[idx_uc3dBuffer++] = 0f; // sec
+				Destroy3D();
+				id_test[0] = -1;
+			}
+		}
+		if ( Input.GetKeyDown (KeyCode.T) ) {
+			if( id_test[1] == -1f ){
+
+				idx_uc3dBuffer = 0;
+				uc3dBuffer[idx_uc3dBuffer++] = 1f; // active
+				Begin3D( "Test_Torus" );
+				id_test[1] = uc3dBuffer[0];
+
+				var n = 600;
+				var p = 3f;
+				var q = 8f;
+
+				idx_uc3dBuffer = 0;
+				uc3dBuffer[idx_uc3dBuffer++] = (float)n;
+				for( var i = 0; i< n; ++i ){
+					var w = 2f * Mathf.PI * (float)i / n;
+					var r = Mathf.Cos (q * w) + 2f;
+					uc3dBuffer[idx_uc3dBuffer++] = Mathf.Sin (q * w); //x
+					uc3dBuffer[idx_uc3dBuffer++] = r * Mathf.Cos (p * w); //y
+					uc3dBuffer[idx_uc3dBuffer++] = r * Mathf.Sin (p * w); //z
+				}
+
+				uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Colors;
+				uc3dBuffer[idx_uc3dBuffer++] = (float)(n+1);
+				for (var i = 0; i < n+1; ++i) {
+					var	hue = (float)i / n;
+					var cl = Color.HSVToRGB (hue, 1f, 1f);
+					uc3dBuffer[idx_uc3dBuffer++] = cl.r; // r
+					uc3dBuffer[idx_uc3dBuffer++] = cl.g; // g
+					uc3dBuffer[idx_uc3dBuffer++] = cl.b; // b
+				}
+
+				uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Radius;
+				uc3dBuffer[idx_uc3dBuffer++] = 4f; 
+
+				uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Topology;
+				uc3dBuffer[idx_uc3dBuffer++] = (float)TOPOLOGY.Close;
+
+				uc3dBuffer[idx_uc3dBuffer++] = -1f;
+
+				AddLine3D();
+
+				End3D();				
+			}
+			else{
+				idx_uc3dBuffer = 0;
+				uc3dBuffer[idx_uc3dBuffer++] = id_test[1]; // id
+				uc3dBuffer[idx_uc3dBuffer++] = 0f; // sec
+				Destroy3D();
+				id_test[1] = -1;
+			}
+		}
 	}
 
 	private void ShowStatus(){
-		if( !manager.StatusTextEnabled ) return;
+
 		counter_status -= Time.deltaTime;
 		if( counter_status < 0 ){
 			var fps = 1f/Time.deltaTime;
-			manager.StatusText = "fps: " + fps + "\nobjects: " + count_gobj + "/"+MAX_OBJECTS;
+			statusText.text =  (testmode ? "- Test Mode -\n\n": "") + "fps: " + fps + "\nobjects: " + gobjs.Count;
 			counter_status = 1f;
 		}
 	}
 
-	private GEOOBJECT init_drawing(){
-		if( idx_drawing < 0 ) return null;
-		var gobj = gObj[idx_drawing];
-		if( gobj == null || gobj.obj == null ) return null;
-		if( ! gobj.obj.initialized ) gobj.obj.Begin ();
-		idx_uc3dBuffer = 0;
-		return gobj;
+	public void FocusCanvas3D( string focus ) {
+
+    	if ( focus == "false" ) {
+    	    WebGLInput.captureAllKeyboardInput = false;
+    	} else if( focus == "true" ){
+     	   	WebGLInput.captureAllKeyboardInput = true;
+    	}
 	}
 
-	private GEOOBJECT init_operation(){
+	private GeometricObject init_drawing(){
 		idx_uc3dBuffer = 0;
-		var idx = (int)uc3dBuffer[idx_uc3dBuffer++];
-		if( idx < 0 || idx >= MAX_OBJECTS ) return null;
-		var gobj = gObj[idx];
-		if( gobj == null || gobj.obj == null ) return null;
-		return gobj;
+		if( gobj_drawing != null && ! gobj_drawing.initialized ) gobj_drawing.Begin ();
+		return gobj_drawing;
+	}
+
+	private GeometricObject init_operation(){
+		idx_uc3dBuffer = 0;
+		var id = (int)uc3dBuffer[idx_uc3dBuffer++];
+		return gobjs[id];
 	}
 
 	private void readPoints_zup_righthand(){
@@ -203,6 +256,10 @@ public class CindyJS : MonoBehaviour {
 			var y = -1 * uc3dBuffer[idx_uc3dBuffer++];
 			angles.Add( new Vector3( x, y, z ) );
 		}
+	}
+
+	private float readFloat(){
+		return uc3dBuffer[idx_uc3dBuffer++];
 	}
 
 	private bool readBoolean(){
@@ -242,47 +299,81 @@ public class CindyJS : MonoBehaviour {
 		}
 	}
 
+    //////////////////////////////////////////////////////////////////////
+    // Object handling functions
+	
 	public void Clear3D(){
 
-		for( var i =0; i < MAX_OBJECTS; ++i ){
-			if( gObj[i] != null ) gObj[i].Clear();
-			gObj[i] = null;
+		foreach( var o in gobjs.Values ){
+			if( testmode ) Manager.DebugLog( "CindyJS::Clear3D : Destroy " + o.name );
+			o.destroyCallback = null;
+			Destroy( o.gameObject );
 		}
+		gobjs.Clear();
+		id_head = 0;
+		for( var i = 0 ; i<  id_test.Length; ++i ) id_test[i] = -1;
+		counter_status = 0;
+	}
 
-		dic_gobj.Clear();
+	private GeometricObject registerGobj( GameObject obj ){
+		
+		var gobj = obj.GetComponent<GeometricObject>();
+		gobj.id = id_head;
+		gobj.destroyCallback = (id) =>{
+       		if (gobjs[id] != null){
+				if( testmode ) Manager.DebugLog( "CindyJS::registerGobj : destroyCallback " + id );	
+				gobjs.Remove(id);
+				#if !UNITY_EDITOR
+            	OnDestroyCS(id);
+				#endif				
+				counter_status = 0;
+        	}
+		};
+		gobjs[id_head] = gobj;
+		++id_head;
+		counter_status = 0;
 
-		idx_drawing = -1;
-		head_gobj = 0;
-		count_gobj = 0;
+		return gobj;
 	}
 
 	public void Begin3D ( string name ){
 
-		idx_drawing = -1;
-		if (dic_gobj.ContainsKey ( name )) {
-			idx_drawing = dic_gobj [name];
-		} 
-		else if( count_gobj < MAX_OBJECTS ){
+		if( gobj_drawing != null ) End3D();
 
+		gobj_drawing = gobjs.FirstOrDefault( item => item.Value.name == name ).Value;
+		if( gobj_drawing == null ){
+	
 			idx_uc3dBuffer = 0;
 			var active = readBoolean();
 
-			var idx = head_gobj;
-			++head_gobj;
-			++count_gobj;
+			var o = Instantiate ( GeometricObjectPrefab );
+			o.name = name;
+			o.SetActive( active );
+			gobj_drawing = registerGobj( o );
 
-			gObj[idx] = new GEOOBJECT();
-			gObj[idx].CreateObject( manager, name );
-			gObj[idx].obj.gameObject.SetActive( active );
-			dic_gobj.Add ( name, idx );
-
-			idx_drawing = idx;
-		}
-		else{
-			Manager.DebugLogError ( "CindyJS::Begin3D : Cannot create a new object. Please destroy unused objects.");
+			if( testmode ) Manager.DebugLog( "CindyJS::Begin3D : Instantiate " + o.name + " id = " + gobj_drawing.id );
 		}
 
-		uc3dBuffer[0] = idx_drawing;
+		uc3dBuffer[0] = gobj_drawing.id;
+	}
+
+	public void Instantiate3D (){
+
+		var gobj = init_operation();
+		if( gobj == null ) return;
+
+		var active = readBoolean();
+
+		if( active ) readPoints_zup_righthand();
+		else points[0] = gobj.gameObject.transform.position;
+
+		var o = Instantiate ( gobj.gameObject, points[0], Quaternion.identity );
+		o.SetActive( active );
+		var gobj_copied = registerGobj( o );	
+
+		if( testmode ) Manager.DebugLog( "CindyJS::Instantiate3D : Instantiate " + o.name + " id = " + gobj_copied.id);	
+
+		uc3dBuffer[0] = gobj_copied.id;
 	}
 
 	public void End3D (){
@@ -290,19 +381,33 @@ public class CindyJS : MonoBehaviour {
 		var gobj = init_drawing();
 		if( gobj == null ) return;
 
-		gobj.obj.End ();
+		gobj.End ();
 
 		// recalculates the bound of collider
-		var cl = gobj.obj.gameObject.GetComponent< BoxCollider >();
+		var cl = gobj.gameObject.GetComponent< BoxCollider >();
 		if( cl != null ){
-			var mr = gobj.obj.gameObject.GetComponent< MeshRenderer >();
+			var mr = gobj.gameObject.GetComponent< MeshRenderer >();
  			cl.center = mr.bounds.center;
  			cl.size = mr.bounds.size;
-			Manager.DebugLog( "CindyJS::End3D : collider size = " + cl.size.x + " / " + cl.size.y + " / " + cl.size.z );
+
+			if( testmode ) Manager.DebugLog( "CindyJS::End3D : collider size = " + cl.size.x + " / " + cl.size.y + " / " + cl.size.z );
 		}
 
-		idx_drawing = -1;
+		gobj_drawing = null;
 	}
+
+	public void Destroy3D (){
+
+		var gobj = init_operation();
+		if( gobj == null ) return;
+		
+		var sec = readFloat();
+
+		Destroy( gobj.gameObject, sec );
+	}
+
+    //////////////////////////////////////////////////////////////////////
+    // Appearance handling functions
 
 	public void AddPoint3D (){
 
@@ -315,9 +420,9 @@ public class CindyJS : MonoBehaviour {
 		frontColor = gobj.pointAppearance.Peek ().frontColor;
 		readModifiers ();
 
-		gobj.obj.SetPointRadius ( radius * POINT_SCALE);
-		gobj.obj.SetPointFrontColor (frontColor);
-		gobj.obj.AddPoint ( points[0] );
+		gobj.SetPointRadius ( radius * POINT_SCALE);
+		gobj.SetPointFrontColor (frontColor);
+		gobj.AddPoint ( points[0] );
 	}
 
 	public void AddLine3D (){
@@ -333,15 +438,15 @@ public class CindyJS : MonoBehaviour {
 		topology = TOPOLOGY.Open;
 		readModifiers();
 
-		gobj.obj.SetLineRadius (radius * POINT_SCALE);
-		gobj.obj.SetLineFrontColor (frontColor);
+		gobj.SetLineRadius (radius * POINT_SCALE);
+		gobj.SetLineFrontColor (frontColor);
 		if (topology == TOPOLOGY.Close) {
-			gobj.obj.SetLineTopology (Pen.Topology.Close);
+			gobj.SetLineTopology (Pen.Topology.Close);
 		} 
 		else {
-			gobj.obj.SetLineTopology (Pen.Topology.Open);
+			gobj.SetLineTopology (Pen.Topology.Open);
 		}
-		gobj.obj.AddLine ( points, frontColors );
+		gobj.AddLine ( points, frontColors );
 	}
 
 	public void AddPolygon3D (){
@@ -354,9 +459,9 @@ public class CindyJS : MonoBehaviour {
 		frontColor = gobj.surfaceAppearance.Peek ().frontColor;
 		readModifiers();
 
-		gobj.obj.SetPolygonFrontColor (frontColor);
-		gobj.obj.SetPolygonBackColor (frontColor);
-		gobj.obj.AddPolygon( points );
+		gobj.SetPolygonFrontColor (frontColor);
+		gobj.SetPolygonBackColor (frontColor);
+		gobj.AddPolygon( points );
 	}
 
 	public void AddSphere3D (){
@@ -370,48 +475,14 @@ public class CindyJS : MonoBehaviour {
 		frontColor = gobj.surfaceAppearance.Peek().frontColor;
 		readModifiers();
 
-		gobj.obj.SetSphereRadius ( radius );
-		gobj.obj.SetSphereFrontColor ( frontColor );
-		gobj.obj.AddSphere ( points[0] );
+		gobj.SetSphereRadius ( radius );
+		gobj.SetSphereFrontColor ( frontColor );
+		gobj.AddSphere ( points[0] );
 	}
 
-	public void FocusCanvas3D( string focus ) {
-
-    	if ( focus == "false" ) {
-//			Manager.DebugLog("unfocused");
-    	    WebGLInput.captureAllKeyboardInput = false;
-    	} else if( focus == "true" ){
-//			Manager.DebugLog("focused");
-     	   	WebGLInput.captureAllKeyboardInput = true;
-    	}
-	}
-
-	public void Instantiate3D (){
-
-		if( count_gobj >= MAX_OBJECTS ){
-			Manager.DebugLogError ( "CindyJS::Instantiate3D : Cannot create a new object. Please destroy unused objects.");
-			return;
-		}
-
-		var gobj = init_operation();
-		if( gobj == null ) return;
-
-		var active = readBoolean();
-
-		if( active ) readPoints_zup_righthand();
-		else points[0] = gobj.obj.gameObject.transform.position;
-
-		var idx = head_gobj;
-		++head_gobj;
-		++count_gobj;
-
-		gObj[idx] = new GEOOBJECT();
-		gObj[idx].CopyObject( manager, gobj, points[0] );
-		gObj[idx].obj.gameObject.SetActive( active );
-
-		uc3dBuffer[0] = idx;
-	}
-
+    //////////////////////////////////////////////////////////////////////
+    // Property handling functions
+	
 	public void SetActive3D (){
 
 		var gobj = init_operation();
@@ -419,7 +490,7 @@ public class CindyJS : MonoBehaviour {
 		
 		var active = readBoolean();
 
-		gobj.obj.gameObject.SetActive( active );
+		gobj.gameObject.SetActive( active );
 	}
 
 	public void UseGravity3D (){
@@ -429,8 +500,8 @@ public class CindyJS : MonoBehaviour {
 		
 		var usegravity = readBoolean();
 
-		var rb = gobj.obj.gameObject.GetComponent< Rigidbody >();
-		if( rb == null ) rb = gobj.obj.gameObject.AddComponent< Rigidbody >();
+		var rb = gobj.gameObject.GetComponent< Rigidbody >();
+		if( rb == null ) rb = gobj.gameObject.AddComponent< Rigidbody >();
 		rb.useGravity = usegravity;
 	}
 
@@ -439,9 +510,12 @@ public class CindyJS : MonoBehaviour {
 		var gobj = init_operation();
 		if( gobj == null ) return;
 
-		var cl = gobj.obj.gameObject.GetComponent< BoxCollider >();
-		if( cl == null ) cl = gobj.obj.gameObject.AddComponent< BoxCollider >();
+		var cl = gobj.gameObject.GetComponent< BoxCollider >();
+		if( cl == null ) cl = gobj.gameObject.AddComponent< BoxCollider >();
 	}
+
+    //////////////////////////////////////////////////////////////////////
+    // Move functions
 
 	public void SetPosition3D (){
 
@@ -450,7 +524,7 @@ public class CindyJS : MonoBehaviour {
 
 		readPoints_zup_righthand();
 
-		gobj.obj.gameObject.transform.position = points[0];
+		gobj.gameObject.transform.position = points[0];
 	}
 
 	public void GetPosition3D (){
@@ -458,7 +532,7 @@ public class CindyJS : MonoBehaviour {
 		var gobj = init_operation();
 		if( gobj == null ) return;
 
-		var point = gobj.obj.gameObject.transform.position;
+		var point = gobj.gameObject.transform.position;
 
 		uc3dBuffer[0] = -1 * point.z;
 		uc3dBuffer[1] = point.x;
@@ -472,7 +546,7 @@ public class CindyJS : MonoBehaviour {
 
 		readAngles_zup_righthand();
 
-		gobj.obj.gameObject.transform.rotation = Quaternion.Euler( angles[0] );
+		gobj.gameObject.transform.rotation = Quaternion.Euler( angles[0] );
 	}
 
 	public void SetVelocity3D (){
@@ -482,14 +556,17 @@ public class CindyJS : MonoBehaviour {
 
 		readPoints_zup_righthand();
 
-		var rb = gobj.obj.gameObject.GetComponent< Rigidbody >();
+		var rb = gobj.gameObject.GetComponent< Rigidbody >();
 		if( rb == null ){
-			rb = gobj.obj.gameObject.AddComponent< Rigidbody >();
+			rb = gobj.gameObject.AddComponent< Rigidbody >();
 			rb.useGravity = false;
 		}
 		rb.velocity = points[0];
 	}
-	
+
+	//////////////////////////////////////////////////////////////////////
+    // Input functions
+
 	public void GetKey3D( string name ){
 		uc3dBuffer[0] = 0;
 		if ( Input.GetKey(name) ){

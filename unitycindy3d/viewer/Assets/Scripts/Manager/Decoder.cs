@@ -94,7 +94,7 @@ public class Decoder{
 
 	public Decoder( Manager _manager ) {
 
-		manager = _manager;
+		// manager = _manager;
 
 		dic_gobj = new Dictionary<string,int> ();
 		idx_gobj = -1;
@@ -130,14 +130,14 @@ public class Decoder{
 		command_buffer.Add (new byte[ BufferSize ]);
 		command_head.Add(0);
 		command_size.Add(0);
-
+/*
 		Manager.context.Post (
 			(state) => { // runs on the main thread
 				var obj = manager.InstantiateGeometricObject();
 				obj.name =  (string)state;
 				gobj.Add (obj.GetComponent<GeometricObject> ());
 			}, name);
-
+*/
 		pointAppearance.Add (new Stack<Appearance> ());
 		pointAppearance[idx_gobj].Push (new Appearance (Color.red, Color.red, 60f, 1f, 1f));
 

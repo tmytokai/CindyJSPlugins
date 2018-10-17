@@ -62,6 +62,11 @@
             } );
   };
 
+  const onDestroyCS = function (id)
+  {
+    if( cdy != null ) cdy.evokeCS( "ondestroy3d("+id+");" );
+  }
+
   const resetButtonClicked = function ()
   {
     let cs = "clear3d(); A.xy = [0,0.2]; B.xy = [0,-0.2]; C.xy = [-1.6,0];";
@@ -117,8 +122,18 @@ Last updated: 5 October 2018
 <h1>UnityCindy3D Tutorial</h1>
 
 <br>
-<h2>point</h2>
+<h2>Usage</h2>
+<p>
+<ul>
+<li>Drag the viewer to rotate the camera.</li>
+<li>Click the viewer to give key focus to the viewer.</li>
+<li>Click the viewer and press F4 key to show/hide the status monitor.</li>
+<li>Click the viewer and press F3 key to enter/exit the test mode. <br> In the test mode, press s key to show/hide a sphere. <br>Press t to show/hide a torus. </li>
+</ul>
 </p>
+
+<br>
+<h2>Point</h2>
 <p>
 code:
 </p>
@@ -138,13 +153,12 @@ end3d();
 </pre>
 <ol>
 <li>Push <input type="button" value="Run" onclick="runButtonClicked('point')" /> </li>
-<li>Drag the viewer to rotate the camera.</li>
 <li>To change the size, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('point')" /> again. </li>
 <li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('point')" />  again. </li>
 </ol>
 
 <br>
-<h2>segment</h2>
+<h2>Segment</h2>
 <p>
 code:
 </p>
@@ -164,13 +178,12 @@ end3d();
 </pre>
 <ol>
 <li>Push <input type="button" value="Run" onclick="runButtonClicked('segment')" /> </li>
-<li>Drag the viewer to rotate the camera.</li>
 <li>To change the size, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('segment')" /> again. </li>
 <li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('segment')" /> again. </li>
 </ol>
 
 <br>
-<h2>segments</h2>
+<h2>Segments</h2>
 <p>
 code:
 </p>
@@ -191,13 +204,12 @@ end3d();
 </pre>
 <ol>
 <li>Push <input type="button" value="Run" onclick="runButtonClicked('segments')" /> </li>
-<li>Drag the viewer to rotate the camera.</li>
 <li>To change the size, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('segments')" /> again. </li>
 <li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('segments')" /> again. </li>
 </ol>
 
 <br>
-<h2>polygon</h2>
+<h2>Polygon</h2>
 <p>
 code:
 </p>
@@ -217,7 +229,6 @@ end3d();
 </pre>
 <ol>
 <li>Push <input type="button" value="Run" onclick="runButtonClicked('polygon')" /> </li>
-<li>Drag the viewer to rotate the camera.</li>
 <li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('polygon')" /> again. </li>
 </ol>
 
@@ -242,14 +253,13 @@ end3d();
 </pre>
 <ol>
 <li>Push <input type="button" value="Run" onclick="runButtonClicked('sphere')" /> </li>
-<li>Drag the viewer to rotate the camera.</li>
 <li>To change the radius, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('sphere')" /> again. </li>
 <li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('sphere')" /> again. </li>
 </ol>
 
 
 <br>
-<h2><a href="https://en.wikipedia.org/wiki/Torus_knot">torus knot(p,q)</a></h2>
+<h2><a href="https://en.wikipedia.org/wiki/Torus_knot">Torus Knot(p,q)</a></h2>
 <p>
 code:
 </p>
@@ -276,7 +286,6 @@ end3d();
 </pre>
 <ol>
 <li>Push <input type="button" value="Run" onclick="runButtonClicked('torus')" /> </li>
-<li>Drag the viewer to rotate the camera.</li>
 <li>To change the thickness, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('torus')" /> again. </li>
 <li>To change the color, rotate the point C, then push <input type="button" value="Run" onclick="runButtonClicked('torus')" /> again. </li>
 </ol>
@@ -285,8 +294,6 @@ end3d();
 <h2> Object Oriented Programming #1:
 <br>
 "basic"</h2>
-
-</h2>
 <p>
 code:
 </p>
@@ -317,15 +324,12 @@ code:
 </pre>
 <ol>
 <li>Push <input type="button" value="Run" onclick="runButtonClicked('oop1')" /> </li>
-<li>Drag the viewer to rotate the camera.</li>
 </ol>
 
 <br>
 <h2> Object Oriented Programming #2:
 <br>
 "gravity"</h2>
-
-</h2>
 <p>
 code:
 </p>
@@ -365,15 +369,12 @@ code:
 </pre>
 <ol>
 <li>Push <input type="button" value="Run" onclick="runButtonClicked('oop2')" /> </li>
-<li>Drag the viewer to rotate the camera.</li>
 </ol>
 
 <br>
 <h2> Object Oriented Programming #3:
 <br>
 "method"</h2>
-
-</h2>
 <p>
 code:
 </p>
@@ -429,7 +430,6 @@ code:
 </pre>
 <ol>
 <li>Push <input type="button" value="Run" onclick="runButtonClicked('oop3')" /> </li>
-<li>Drag the viewer to rotate the camera.</li>
 <li>To move the ball, drag the point A and B.</li>
 </ol>
 
@@ -437,8 +437,6 @@ code:
 <h2> Object Oriented Programming #4:
 <br>
 "keyboard"</h2>
-
-</h2>
 <p>
 code:
 </p>
@@ -492,7 +490,6 @@ code:
 </pre>
 <ol>
 <li>Push <input type="button" value="Run" onclick="runButtonClicked('oop4')" /> </li>
-<li>Drag the viewer to rotate the camera.</li>
 <li>To move the ball, click the viewer and press the arrow keys.</li>
 </ol>
 
@@ -500,8 +497,6 @@ code:
 <h2> Object Oriented Programming #5:
 <br>
 "velocity and rotation"</h2>
-
-</h2>
 <p>
 code:
 </p>
@@ -558,7 +553,6 @@ code:
 </pre>
 <ol>
 <li>Push <input type="button" value="Run" onclick="runButtonClicked('oop5')" /> </li>
-<li>Drag the viewer to rotate the camera.</li>
 <li>To rotate the torus, rotate the point C.</li>
 </ol>
 
@@ -566,8 +560,6 @@ code:
 <h2> Object Oriented Programming #6:
 <br>
 "prototype and instantiate"</h2>
-
-</h2>
 <p>
 code:
 </p>
@@ -630,7 +622,6 @@ code:
 </pre>
 <ol>
 <li>Push <input type="button" value="Run" onclick="runButtonClicked('oop6')" /> </li>
-<li>Drag the viewer to rotate the camera.</li>
 <li>To rotate the toruses, rotate the point C.</li>
 </ol>
 
@@ -638,8 +629,6 @@ code:
 <h2> Object Oriented Programming #7:
 <br>
 "inheriance and override"</h2>
-
-</h2>
 <p>
 code:
 </p>
@@ -722,9 +711,74 @@ code:
 </pre>
 <ol>
 <li>Push <input type="button" value="Run" onclick="runButtonClicked('oop7')" /> </li>
-<li>Drag the viewer to rotate the camera.</li>
 <li>To rotate the toruses, rotate the point C.</li>
 </ol>
+
+
+<br>
+<h2> Object Oriented Programming #8:
+<br>
+"destroy"</h2>
+<p>
+code:
+</p>
+<pre class="code" id="oop8">
+  ///////////////////////////
+  // axes object
+  begin3d( "axes" );
+    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
+    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
+    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
+  end3d();
+
+  ///////////////////////////
+  // plane object
+  begin3d( "plane" );
+    pt=[ [ 5, 5,0], [ 5,-5,0], [-5,-5,0], [-5, 5,0] ];
+    fillpoly3d( pt, color->[0, 0.5, 0.5] );
+
+    // properties
+    addcollider3d();
+
+  end3d();
+
+  ///////////////////////////
+  // prototype (invisible)
+  torus = createprototype3d( "torus" );
+    n=600; 
+    p=3; 
+    q=8; 
+    pt=apply(0..n-1,i, w =i/n*2*pi; 
+      r=cos(q*w)+2; 
+      ( 0.2*sin(q*w), 0.2*r*cos(p*w), 0.2*r*sin(p*w) ) ); 
+    cl=apply(0..n,i, hue( i/n ); );
+    connect3d(pt,cl,size->1,topology->"close");
+
+    // properties
+    addcollider3d();
+    usegravity3d( true );
+
+    // methods
+    starttorus() := (
+      setvelocity3d( [0,4,8] );
+      sec = 2+random(3);
+      destroy3d( sec ); // destroy this object after sec seconds
+    );
+    setstart3d( starttorus() );
+
+  end3d();
+
+  ///////////////////////////
+  // instantiate
+
+  instantiate3d( torus, [-1.5,  -4, 0.2] );
+  instantiate3d( torus, [   0,  -4, 0.2] );
+  instantiate3d( torus, [ 1.5,  -4, 0.2] );
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop8')" /> </li>
+</ol>
+
 
 <br>
 <h2>To be continued..</h2>
