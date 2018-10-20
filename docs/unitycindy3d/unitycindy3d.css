@@ -12,6 +12,12 @@ div.side {
   left: 580px;
 }
 
+div.center {
+  width: 650px;
+  padding: 10px;
+  margin:0 auto;
+}
+
 textarea#code{
   resize: none;
   width: 598px;

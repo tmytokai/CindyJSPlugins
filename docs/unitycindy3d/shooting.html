@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Shooting</title>
+<meta charset="utf-8">
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<link rel="stylesheet" href="./unitycindy3d.css">
+
+<link rel="stylesheet" href="https://cindyjs.org/dist/latest/CindyJS.css">
+<script type="text/javascript" src="https://cindyjs.org/dist/latest/Cindy.js"></script>
+
+<link rel="stylesheet"         href="../dist/latest/unitycindy3d/viewer/TemplateData/style.css">
+<link rel="shortcut icon"      href="../dist/latest/unitycindy3d/viewer/TemplateData/favicon.ico">
+<script type="text/javascript" src="../dist/latest/unitycindy3d/viewer/TemplateData/UnityProgress.js"></script>
+<script type="text/javascript" src="../dist/latest/unitycindy3d/viewer/Build/UnityLoader.js"></script>
+<script type="text/javascript" src="../dist/latest/unitycindy3d/UnityCindy3D.js"></script>
+
+<script type="text/javascript">
+  let cdy = null;
+  let gameInstance = UnityLoader.instantiate( "UC3DCanvas",
+                                              "../dist/latest/unitycindy3d/viewer/Build/WebGL.json",
+                                              {onProgress: UnityProgress} );
+  const startCS = function ()
+  {
+    if( gameInstance == null ) return;
+    if( cdy != null ) return;
+
+    cdy = CindyJS( {
+            ports: [
+              {
+                id: "CSCanvas",
+                width: 600, height: 100,
+                transform: [ { visibleRect: [ -3, 0.5, 3, -0.5 ] } ],  // left,top,right,bottom
+                background: "rgb(168,176,192)"
+              }
+              ],
+              scripts: "cs*",
+              autoplay: true,
+              use: ["UnityCindy3D"],
+              angleUnit: "°",
+              geometry: [
+                {name: "Start", type: "Button", pos: [2,  0], color: [0.0, 0.0, 0.0], text: "Start", script: 'startbutton();' },
+
+                {name:"AL", type:"Free", pos:[ 0,  0], color: [ 0, 0, 0 ], size: 1, pinned: true },
+                {name:"AR", type:"Free", pos:[ 1,  0], color: [ 0, 0, 0 ], size: 1, pinned: true },
+                {name:"sga", type:"Segment", args:["AL","AR"], color:[ 0, 0, 0], size:1 },
+                {name:"A", type:"PointOnSegment", args: ["sga"], pos:[ 0.5,  0], color: [ 1, 1, 0 ], labeled: false},
+              ],
+            } );
+  };
+
+  const onCollisionEnterCS = function (id1,id2)
+  {
+    if( cdy != null ) cdy.evokeCS( "oncollisionenter3d("+id1+","+id2+");" );
+  }
+
+  const onDestroyCS = function (id)
+  {
+    if( cdy != null ) cdy.evokeCS( "ondestroy3d("+id+");" );
+  }
+
+  document.addEventListener( 'click', function(e)
+  {
+    if( gameInstance == null ) return;
+    if( cdy == null ) return;
+
+    if (e.target.id == "#canvas") {
+          gameInstance.SendMessage ( 'Manager', 'FocusCanvas3D', "true" );
+      } else {
+          gameInstance.SendMessage ( 'Manager', 'FocusCanvas3D', "false" );
+      }
+  });
+</script>
+
+<script id="csinit" type="text/x-cindyscript">
+
+  Clear3D();
+
+  playing = false;
+  score=0;
+  countenemy = 0;
+
+  axes = createprototype3d( "axes" );
+    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
+    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
+    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
+  end3d();
+
+  enemy = createprototype3d( "enemy" );
+    n=600; 
+    p=3; 
+    q=8; 
+    pt=apply(0..n-1,i, w =i/n*2*pi; 
+      r=cos(q*w)+2; 
+      ( 0.5*sin(q*w), 0.5*r*cos(p*w), 0.5*r*sin(p*w) ) ); 
+    cl=apply(0..n,i, hue( i/n ); );
+    connect3d(pt,cl,size->2,topology->"close");
+
+    // properties
+    addcollider3d();
+    addmass3d(10);
+    usegravity3d( true );
+
+    // methods
+    startenemy() := (
+      destroy3d( 6 );
+    );
+    setstart3d( startenemy() );
+
+    collisionenterenemy( hitobj ) := (
+       if( get3d(hitobj,"name") == "bullet",
+          score = score+1;
+          destroy3d( 0.5 ); 
+          destroy3d( hitobj, 0 ); 
+        );
+    );
+    setcollisionenter3d( collisionenterenemy() );
+
+  end3d();
+
+  bullet = createprototype3d( "bullet" );
+    draw3d( [0,0,0], 0.5, color->[1, 1, 1] );
+
+    // properties
+    addcollider3d();
+    addmass3d(1);
+
+    // methods
+    startbullet() := (
+      setvelocity3d( [-4,0,0] );
+      destroy3d( 4 );
+    );
+    setstart3d( startbullet() );
+
+  end3d();
+
+  player = createprototype3d( "player" );
+    drawsphere3d( [0,0,0], 0.3, color->[1, 0, 0] );
+
+    // fields
+    set3d( "counter", 0);
+
+    // methods
+    updateplayer() := (
+      p = getposition3d();
+      p_2 = -2 + 4*(A.x-AL.x)/(AR.x-AL.x);
+      setposition3d( p );
+
+      counter = get3d( "counter" ) - 1;
+      if( counter < 0,
+          counter = 10;
+          p_1 = p_1 - 0.2;
+          instantiate3d( bullet, p );
+      );
+      set3d( "counter", counter);
+    );
+    setupdate3d( updateplayer() );
+
+  end3d();
+
+  startbutton() := (
+    if( playing == false,
+      A.xy = [0.5,0];
+      playing = true;
+      instantiate3d( axes, [0, 0, 0 ] );
+      instantiate3d( player, [3, 0, 0 ] );
+    );
+  );
+
+</script>
+
+<script id="csdraw" type="text/x-cindyscript">
+  if(playing == true,
+
+     countenemy = countenemy -1;
+     if( countenemy < 0,
+       y = -2+random(4);
+       instantiate3d( enemy, [-2, y, 5 ] );
+       countenemy = 100;
+     );
+     drawtext((-2.5, 0), "score: " + score),
+
+     drawtext((-2.5, 0), "Push Start Button")
+   );
+</script>
+
+<script id="cstick" type="text/x-cindyscript">
+  update3d();
+</script>
+
+</head>
+
+<body>
+<div class="center">
+  <div id="UC3DCanvas" style="width: 600px; height: 400px"></div>
+  <div id="CSCanvas"   style="width: 600px; height: 100px">Loading...Please wait.</div>
+</div>
+</body>
+</html>

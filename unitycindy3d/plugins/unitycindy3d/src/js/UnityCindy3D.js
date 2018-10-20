@@ -309,7 +309,6 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 
 	let id = coerce.toInt( evaluate(args[0]) );
 	delete gameobjs[id];
-	console.log( "ondestroy3d: id = " + id +  " / gameobjs.length = " + Object.keys(gameobjs).length );
 	return nada;
     });
 
