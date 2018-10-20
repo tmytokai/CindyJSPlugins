@@ -241,16 +241,10 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 	    gameInstance.SendMessage ( 'Manager', 'Instantiate3D', "" );
 	    ret = Math.floor(uc3dBuffer[0]);
 
-	    let obj = 
-		{
-		    id: ret,
-		    name: obj_src.name,
-		    active: active,
-		    init: false,
-		    start: obj_src.start,
-		    update: obj_src.update,
-    		    collisionenter: obj_src.collisionenter
-		};
+	    let obj = JSON.parse( JSON.stringify(obj_src) );
+	    obj["id"] = ret;
+	    obj["active"] = active;
+	    obj["init"] = false;
 	    gameobjs[ret] = obj;
 	}
 
@@ -276,8 +270,6 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 
 	let obj = gameobjs[id1];
 	if( ! obj ) return nada;
-
-	console.log( "oncollisionenter3d: id1 = " + id1 +  " / id2 = " + id2 );
 
 	if( obj.collisionenter != null ){
 	    thisid = obj.id;
@@ -480,6 +472,30 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 	return nada;
     }
 
+    defOp("setmass3d", 1, function(args, modifs) {
+	return setmass3dImpl( thisid, args, 0, modifs );
+    });
+
+    defOp("setmass3d", 2, function(args, modifs) {
+	return setmass3dImpl( coerce.toInt( evaluate(args[0]) ), args, 1, modifs );
+    });
+
+    const setmass3dImpl = function ( id, args, offset, modifs ){
+
+	if( id == -1 ) return nada;
+	if( initOperation() == false ) return nada;
+
+	let mass = coerce.toReal( evaluate(args[offset]) );
+
+	setId( id );
+
+	setValue( mass );
+
+	gameInstance.SendMessage ( 'Manager', 'SetMass3D', "" );
+
+	return nada;
+    }
+
     //////////////////////////////////////////////////////////////////////
     // Field handling functions
 
@@ -501,6 +517,28 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 
 	let key = coerce.toString( evaluate(args[offset]) );
 	if( obj[key] ) return obj[key];
+
+	return nada;
+    }
+
+    defOp("set3d", 2, function(args, modifs) {
+	return set3dImpl( thisid, args, 0, modifs );
+    });
+
+    defOp("set3d", 3, function(args, modifs) {
+	return set3dImpl( coerce.toInt( evaluate(args[0]) ), args, 1, modifs );
+    });
+
+    const set3dImpl = function ( id, args, offset, modifs ){
+
+	if( id == -1 ) return nada;
+	if( initOperation() == false ) return nada;
+
+	let obj = gameobjs[id];
+	if( ! obj ) return nada;
+
+	let key = coerce.toString( evaluate(args[offset]) );
+	obj[key] = evaluate(args[offset+1]);
 
 	return nada;
     }

@@ -41,13 +41,13 @@
               use: ["UnityCindy3D"],
               angleUnit: "°", 
               geometry: [
-                {name:"AL", type:"Free", pos:[ -1,  0.2], color: [ 0, 0, 0 ], size: 1},
-                {name:"AR", type:"Free", pos:[  1,  0.2], color: [ 0, 0, 0 ], size: 1},
+                {name:"AL", type:"Free", pos:[ -1,  0.2], color: [ 0, 0, 0 ], size: 1, pinned: true},
+                {name:"AR", type:"Free", pos:[  1,  0.2], color: [ 0, 0, 0 ], size: 1, pinned: true},
                 {name:"sga", type:"Segment", args:["AL","AR"], color:[ 0, 0, 0], size:1 },
                 {name:"A", type:"PointOnSegment", args: ["sga"], pos:[ 0,  0.2], color: [ 1, 1, 0 ], labeled: true},
 
-                {name:"BL", type:"Free", pos:[ -1,  -0.2], color: [ 0, 0, 0 ], size: 1},
-                {name:"BR", type:"Free", pos:[  1,  -0.2], color: [ 0, 0, 0 ], size: 1},
+                {name:"BL", type:"Free", pos:[ -1,  -0.2], color: [ 0, 0, 0 ], size: 1, pinned: true},
+                {name:"BR", type:"Free", pos:[  1,  -0.2], color: [ 0, 0, 0 ], size: 1, pinned: true},
                 {name:"sgb", type:"Segment", args:["BL","BR"], color:[ 0, 0, 0], size:1 },
                 {name:"B", type:"PointOnSegment", args: ["sgb"], pos:[ 0,  -0.2], color: [ 0, 1, 1 ], labeled: true},
 
@@ -121,22 +121,60 @@
 <div class="contents">
 
 <p>
-Last updated: 5 October 2018
+<a href="../">Top</a>
 </p>
 
 <h1>UnityCindy3D Tutorial</h1>
 
+<hr>
+<h2>What's UnityCindy3D?</h2>
+
+<p>
+Coming soon...
+</p>
+
+<p>
+<a href="https://cindyjs.org/">CindyJS</a>
+</p>
+
+<hr>
+<h2>Supported Browsers</h2>
+
+<p>
+<b>Desktop browsers (64bit) :</b>
 <br>
+Firefox 62+  (recommended)
+<br>
+Chrome 57+
+<br>
+Microsoft Edge
+</p>
+
+<p>
+<b>Desktop browsers (32 bit) :</b>
+<br>
+not supported
+</p>
+
+<p>
+<b>Mobile browsers :</b>
+<br>
+(currently) not supported
+</p>
+
+<hr>
 <h2>Usage</h2>
 <p>
 <ul>
 <li>Drag the viewer to rotate the camera.</li>
 <li>Click the viewer to give key focus to the viewer.</li>
-<li>Click the viewer and press F4 key to enter/exit the test mode. <br> In the test mode, press s key to show/hide a sphere. <br>Press t to show/hide a torus. <br>Press b key to throw a ball.</li>
+<li>Click the viewer and press F4 key to enter/exit the test mode. <br>(test mode)<br>s key: show/hide a sphere<br>t key: show/hide a torus<br>b key: throw a ball</li>
 </ul>
 </p>
 
-<br>
+<hr>
+<h2>Drawing</h2>
+
 <h2>Point</h2>
 <p>
 code:
@@ -161,7 +199,6 @@ end3d();
 <li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('point')" />  again. </li>
 </ol>
 
-<br>
 <h2>Segment</h2>
 <p>
 code:
@@ -186,7 +223,6 @@ end3d();
 <li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('segment')" /> again. </li>
 </ol>
 
-<br>
 <h2>Segments</h2>
 <p>
 code:
@@ -212,7 +248,6 @@ end3d();
 <li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('segments')" /> again. </li>
 </ol>
 
-<br>
 <h2>Polygon</h2>
 <p>
 code:
@@ -236,8 +271,7 @@ end3d();
 <li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('polygon')" /> again. </li>
 </ol>
 
-<br>
-<h2>sphere</h2>
+<h2>Sphere</h2>
 <p>
 code:
 </p>
@@ -261,8 +295,6 @@ end3d();
 <li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('sphere')" /> again. </li>
 </ol>
 
-
-<br>
 <h2><a href="https://en.wikipedia.org/wiki/Torus_knot">Torus Knot(p,q)</a></h2>
 <p>
 code:
@@ -294,14 +326,19 @@ end3d();
 <li>To change the color, rotate the point C, then push <input type="button" value="Run" onclick="runButtonClicked('torus')" /> again. </li>
 </ol>
 
-<br>
-<h2> Object Oriented Programming #1:
-<br>
-"basic"</h2>
+<h2><a href="https://en.wikipedia.org/wiki/Enneper_surface">Enneper surface</a></h2>
+<p>
+coming soon...
+</p>
+
+<hr>
+<h2> Object Oriented Programming</h2>
+
+<h2>Basic</h2>
 <p>
 code:
 </p>
-<pre class="code" id="oop1">
+<pre class="code" id="basic">
   ///////////////////////////
   // axes object
   begin3d( "axes" );
@@ -327,17 +364,15 @@ code:
 
 </pre>
 <ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop1')" /> </li>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('basic')" /> </li>
 </ol>
 
 <br>
-<h2> Object Oriented Programming #2:
-<br>
-"gravity"</h2>
+<h2>Gravity and Collider</h2>
 <p>
 code:
 </p>
-<pre class="code" id="oop2">
+<pre class="code" id="gravity">
   ///////////////////////////
   // axes object
   begin3d( "axes" );
@@ -372,17 +407,58 @@ code:
 
 </pre>
 <ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop2')" /> </li>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('gravity')" /> </li>
 </ol>
 
-<br>
-<h2> Object Oriented Programming #3:
-<br>
-"method"</h2>
+<h2>"Mass and Velocity"</h2>
 <p>
 code:
 </p>
-<pre class="code" id="oop3">
+<pre class="code" id="mass">
+ ///////////////////////////
+  // axes object
+  begin3d( "axes" );
+    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
+    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
+    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
+  end3d();
+
+  ///////////////////////////
+  // ball1
+  ball1 = begin3d( "ball1" );
+    drawsphere3d( [0,0,0], 0.5, color->[0, 0, 1] );
+
+    // properties
+    addcollider3d();
+    setmass3d( 1 );
+    setvelocity3d([-1,0,0]);
+
+  end3d();
+
+  setposition3d( ball1, [2,0,0] );
+
+  ///////////////////////////
+  // ball2
+  ball2 = begin3d( "ball2" );
+    drawsphere3d( [0,0,0], 0.5, color->[1, 0, 0] );
+
+    // properties
+    addcollider3d();
+    setmass3d( 5 );
+
+  end3d();
+
+  setposition3d( ball2, [0,0,0] );
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('mass')" /> </li>
+</ol>
+
+<h2>Methods</h2>
+<p>
+code:
+</p>
+<pre class="code" id="methods">
 
   A.xy = [0,0.2];
   B.xy = [0,-0.2];
@@ -433,18 +509,74 @@ code:
 
 </pre>
 <ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop3')" /> </li>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('methods')" /> </li>
 <li>To move the ball, drag the point A and B.</li>
 </ol>
 
-<br>
-<h2> Object Oriented Programming #4:
-<br>
-"keyboard"</h2>
+<h2>Rotation</h2>
 <p>
 code:
 </p>
-<pre class="code" id="oop4">
+<pre class="code" id="rotation">
+  ///////////////////////////
+  // axes object
+  begin3d( "axes" );
+    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
+    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
+    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
+  end3d();
+
+  ///////////////////////////
+  // plane object
+  begin3d( "plane" );
+    pt=[ [ 5, 5,0], [ 5,-5,0], [-5,-5,0], [-5, 5,0] ];
+    fillpoly3d( pt, color->[0, 0.5, 0.5] );
+
+    // properties
+    addcollider3d();
+
+  end3d();
+
+  ///////////////////////////
+  // torus object
+  begin3d( "torus" );
+    n=600; 
+    p=3; 
+    q=8; 
+    pt=apply(0..n-1,i, w =i/n*2*pi; 
+      r=cos(q*w)+2; 
+      ( 0.2*sin(q*w), 0.2*r*cos(p*w), 0.2*r*sin(p*w) ) ); 
+    cl=apply(0..n,i, hue( i/n ); );
+    connect3d(pt,cl,size->1,topology->"close");
+
+    // properties
+    addcollider3d();
+    usegravity3d( true );
+
+    // methods
+    starttorus() := (
+      setposition3d( [0,0,2] );
+    );
+    setstart3d( starttorus() );
+
+    updatetorus() := (
+      setrotation3d( [0, 0, -angl/1°]);
+    );
+    setupdate3d( updatetorus() );
+
+  end3d();
+
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('rotation')" /> </li>
+<li>To rotate the torus, rotate the point C.</li>
+</ol>
+
+<h2>Keyboard</h2>
+<p>
+code:
+</p>
+<pre class="code" id="keyboard">
   ///////////////////////////
   // axes object
   begin3d( "axes" );
@@ -493,18 +625,15 @@ code:
 
 </pre>
 <ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop4')" /> </li>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('keyboard')" /> </li>
 <li>To move the ball, click the viewer and press the arrow keys.</li>
 </ol>
 
-<br>
-<h2> Object Oriented Programming #5:
-<br>
-"velocity and rotation"</h2>
+<h2>Prototype object and Instantiate</h2>
 <p>
 code:
 </p>
-<pre class="code" id="oop5">
+<pre class="code" id="prototype">
   ///////////////////////////
   // axes object
   begin3d( "axes" );
@@ -525,70 +654,7 @@ code:
   end3d();
 
   ///////////////////////////
-  // torus object
-  begin3d( "torus" );
-    n=600; 
-    p=3; 
-    q=8; 
-    pt=apply(0..n-1,i, w =i/n*2*pi; 
-      r=cos(q*w)+2; 
-      ( 0.2*sin(q*w), 0.2*r*cos(p*w), 0.2*r*sin(p*w) ) ); 
-    cl=apply(0..n,i, hue( i/n ); );
-    connect3d(pt,cl,size->1,topology->"close");
-
-    // properties
-    addcollider3d();
-    usegravity3d( true );
-
-    // methods
-    starttorus() := (
-      setposition3d( [0,-4,0.2] );
-      setvelocity3d( [0,4,8] );
-    );
-    setstart3d( starttorus() );
-
-    updatetorus() := (
-      setrotation3d( [0, 0, -angl/1°]);
-    );
-    setupdate3d( updatetorus() );
-
-  end3d();
-
-</pre>
-<ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop5')" /> </li>
-<li>To rotate the torus, rotate the point C.</li>
-</ol>
-
-<br>
-<h2> Object Oriented Programming #6:
-<br>
-"prototype and instantiate"</h2>
-<p>
-code:
-</p>
-<pre class="code" id="oop6">
-  ///////////////////////////
-  // axes object
-  begin3d( "axes" );
-    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
-    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
-    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
-  end3d();
-
-  ///////////////////////////
-  // plane object
-  begin3d( "plane" );
-    pt=[ [ 5, 5,0], [ 5,-5,0], [-5,-5,0], [-5, 5,0] ];
-    fillpoly3d( pt, color->[0, 0.5, 0.5] );
-
-    // properties
-    addcollider3d();
-
-  end3d();
-
-  ///////////////////////////
-  // prototype (invisible)
+  // prototype object (invisible)
   torus = createprototype3d( "torus" );
     n=600; 
     p=3; 
@@ -625,18 +691,83 @@ code:
 
 </pre>
 <ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop6')" /> </li>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('prototype')" /> </li>
 <li>To rotate the toruses, rotate the point C.</li>
 </ol>
 
 <br>
-<h2> Object Oriented Programming #7:
-<br>
-"inheriance and override"</h2>
+<h2>Fields</h2>
 <p>
 code:
 </p>
-<pre class="code" id="oop7">
+<pre class="code" id="fields">
+  ///////////////////////////
+  // axes object
+  begin3d( "axes" );
+    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
+    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
+    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
+  end3d();
+ 
+ ///////////////////////////
+  // prototype object (invisible)
+  ball = createprototype3d( "ball" );
+    drawsphere3d( [0,0,0], 0.2, color->[1, 0, 0] );
+
+    // fields
+    set3d( "r", 2);
+    set3d( "theta", 0 );
+    set3d( "dtheta", 0 );
+    set3d( "phi", 0 );
+    set3d( "dphi", 0 );
+
+    // methods
+    updateball() := (
+
+       r = get3d("r");
+       theta = get3d( "theta" ) + get3d( "dtheta" );
+       phi = get3d( "phi" ) + get3d( "dphi" );
+       set3d( "theta", theta );
+       set3d( "phi", phi );
+
+       x = r*sin(theta)*cos(phi);
+       y = r*sin(theta)*sin(phi);
+       z = r*cos(theta);
+
+       setposition3d([x,y,z]);
+    );
+    setupdate3d( updateball() );
+
+  end3d();
+
+  ///////////////////////////
+  // instantiate
+
+  apply(0..3,i, 
+    obj = instantiate3d( ball,  [0,  0,  0] );
+    set3d(obj,"r", 2);
+    set3d(obj,"theta",pi/2);
+    set3d(obj,"phi", pi/2*i);
+    set3d(obj,"dphi", 0.1);
+  );
+
+  apply(0..3,i, 
+    obj = instantiate3d( ball,  [0,  0,  0] );
+    set3d(obj,"r", 3);
+    set3d(obj,"theta",pi/2*i);
+    set3d(obj,"dtheta",0.1);
+    set3d(obj,"phi", 0);
+  );
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('fields')" /> </li>
+</ol>
+
+<h2>Inheriance and Override</h2>
+<p>
+code:
+</p>
+<pre class="code" id="inheri">
   ///////////////////////////
   // axes object
   begin3d( "axes" );
@@ -657,7 +788,7 @@ code:
   end3d();
 
   ///////////////////////////
-  // prototype (invisible)
+  // prototype object (invisible)
   torus = createprototype3d( "torus" );
     n=600; 
     p=3; 
@@ -714,19 +845,15 @@ code:
 
 </pre>
 <ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop7')" /> </li>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('inheri')" /> </li>
 <li>To rotate the toruses, rotate the point C.</li>
 </ol>
 
-
-<br>
-<h2> Object Oriented Programming #8:
-<br>
-"destroy"</h2>
+<h2>Destroy</h2>
 <p>
 code:
 </p>
-<pre class="code" id="oop8">
+<pre class="code" id="destroy">
   ///////////////////////////
   // axes object
   begin3d( "axes" );
@@ -747,7 +874,7 @@ code:
   end3d();
 
   ///////////////////////////
-  // prototype (invisible)
+  // prototype object (invisible)
   ball = createprototype3d( "ball" );
     drawsphere3d( [0,0,0], 0.2, color->[1, 0, 0] );
 
@@ -773,18 +900,14 @@ code:
   instantiate3d( ball, [ 1.5,  -4, 0.4] );
 </pre>
 <ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop8')" /> </li>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('destroy')" /> </li>
 </ol>
 
-
-<br>
-<h2> Object Oriented Programming #9:
-<br>
-"collision"</h2>
+<h2>Collision</h2>
 <p>
 code:
 </p>
-<pre class="code" id="oop9">
+<pre class="code" id="collision">
  ///////////////////////////
   // axes object
   begin3d( "axes" );
@@ -804,7 +927,7 @@ code:
 
     // methods
     collisionenterplane( hitobj ) := (
-       if( get3d(hitobj,"name") == "redball",  // get3d is the getter of a field value
+       if( get3d(hitobj,"name") == "redball",
           destroy3d( hitobj, 0 ); 
         );
        if( get3d(hitobj,"name") == "blueball",
@@ -816,7 +939,7 @@ code:
   end3d();
 
   ///////////////////////////
-  // prototype (invisible)
+  // prototype object (invisible)
   redball = createprototype3d( "redball" );
     drawsphere3d( [0,0,0], 0.2, color->[1, 0, 0] );
 
@@ -827,7 +950,7 @@ code:
   end3d();
 
   ///////////////////////////
-  // prototype (invisible)
+  // prototype object (invisible)
   blueball = createprototype3d( "blueball" );
     drawsphere3d( [0,0,0], 0.2, color->[0, 0, 1] );
 
@@ -846,7 +969,7 @@ code:
   instantiate3d( blueball, [ 2,  0, 8] );
 </pre>
 <ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('oop9')" /> </li>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('collision')" /> </li>
 </ol>
 
 <br>

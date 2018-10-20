@@ -33,4 +33,12 @@ public class Appearance{
 		radius = _radius;
 		alpha = _alpha;
 	}
+
+	public Appearance( Appearance src ){
+		frontColor = src.frontColor;
+		backColor = src.backColor;
+		shininess = src.shininess;
+		radius = src.radius;
+		alpha = src.alpha;
+	}
 }

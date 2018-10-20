@@ -78,7 +78,7 @@ public class CindyJS : MonoBehaviour {
 	private int idx_uc3dBuffer;
 
 	private bool testmode = false;
-	private int[] id_test = {-1,-1,-1};
+	private int[] id_test = {-1,-1,-1,-1};
 
 	void Start () {
 
@@ -138,6 +138,21 @@ public class CindyJS : MonoBehaviour {
 			AddCollider3D();
 		};
 
+		System.Action<int,float> setmass = (id,mass) => {
+			idx_uc3dBuffer = 0;
+			uc3dBuffer[idx_uc3dBuffer++] = id;
+			uc3dBuffer[idx_uc3dBuffer++] = mass;
+			SetMass3D();
+		};
+
+		System.Action<float,float,float> setcolor = (r,g,b) => {
+			idx_uc3dBuffer = 0;
+			uc3dBuffer[idx_uc3dBuffer++] = r;
+			uc3dBuffer[idx_uc3dBuffer++] = g;
+			uc3dBuffer[idx_uc3dBuffer++] = b;
+			SetColor3D();
+		};
+
 		System.Action<int,float,float,float> setpos = (id,x,y,z) => {
 			idx_uc3dBuffer = 0;
 			uc3dBuffer[idx_uc3dBuffer++] = id;
@@ -158,7 +173,12 @@ public class CindyJS : MonoBehaviour {
 			SetVelocity3D();
 		};
 
-		System.Action<int, float,float,float,float> sphere = (id, radius,r,g,b) => {
+		System.Action<float> setradius = (radius) => {
+			uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Radius;
+			uc3dBuffer[idx_uc3dBuffer++] = radius; 
+		};
+
+		System.Action<float,float,float,float> sphere = (radius,r,g,b) => {
 
 			idx_uc3dBuffer = 0;
 			uc3dBuffer[idx_uc3dBuffer++] = 1f;
@@ -166,8 +186,7 @@ public class CindyJS : MonoBehaviour {
 			uc3dBuffer[idx_uc3dBuffer++] = 0f; //y
 			uc3dBuffer[idx_uc3dBuffer++] = 0f; //z
 
-			uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Radius;
-			uc3dBuffer[idx_uc3dBuffer++] = radius; 
+			setradius(radius);
 
 			uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Color;
 			uc3dBuffer[idx_uc3dBuffer++] = r;
@@ -179,7 +198,7 @@ public class CindyJS : MonoBehaviour {
 			AddSphere3D();
 		};
 
-		System.Action<int> torus = (id) =>{
+		System.Action torus = () =>{
 
 			var n = 600;
 			var p = 3f;
@@ -205,8 +224,7 @@ public class CindyJS : MonoBehaviour {
 				uc3dBuffer[idx_uc3dBuffer++] = cl.b; // b
 			}
 
-			uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Radius;
-			uc3dBuffer[idx_uc3dBuffer++] = 4f; 
+			setradius(4);
 
 			uc3dBuffer[idx_uc3dBuffer++] = (float)MODIFIERS.Topology;
 			uc3dBuffer[idx_uc3dBuffer++] = (float)TOPOLOGY.Close;
@@ -216,12 +234,47 @@ public class CindyJS : MonoBehaviour {
 			AddLine3D();
 		};
 
+		System.Action enneper = () => {
+
+			setcolor(1f,1f,1f);
+
+			List<Vector3> vl = new List<Vector3>();
+			for( var ii = -20; ii <=20; ++ii ){
+				var u=ii/10f;
+				for( var jj = -20; jj <=20; ++jj ){
+					var v=jj/10f;
+   					var x = u * (1f-u*u+v*v)/3f;
+   					var y = -v * (1f-v*v+u*u)/3f;
+   					var z=(u*u-v*v)/3f;
+					vl.Add( new Vector3(x,y,z));		   
+				}
+			}
+
+			foreach( var v in vl ){
+				
+				idx_uc3dBuffer = 0;
+				uc3dBuffer[idx_uc3dBuffer++] = 1f;
+				uc3dBuffer[idx_uc3dBuffer++] = v.x;
+				uc3dBuffer[idx_uc3dBuffer++] = v.y;
+				uc3dBuffer[idx_uc3dBuffer++] = v.z;
+
+				setradius(0.4f);
+
+				uc3dBuffer[idx_uc3dBuffer++] = -1f;
+
+				AddPoint3D();
+			}
+
+			// TODO:  AddMesh3D()
+		};
+
 		if ( Input.GetKeyDown (KeyCode.S) ) {
 			var idx = 0;
 			if( id_test[idx] == -1f ){
 				var id = begin(idx, "Test_Sphere");				
-				sphere(id, 0.5f, 1f, 1f, 1f);
+				sphere(0.55f, 1f, 1f, 1f);
 				addcol(id);
+				setmass(id,2f);
 				end();
 				setpos(id, 2f, 0f, 0f);
 			}
@@ -233,8 +286,9 @@ public class CindyJS : MonoBehaviour {
 			var idx = 1;
 			if( id_test[idx] == -1f ){
 				var id = begin(idx,"Test_Torus");
-				torus(id);
+				torus();
 				addcol(id);
+				setmass(id,5f);
 				end();
 				setpos(id,-2f,0f,0f);
 			}
@@ -242,12 +296,27 @@ public class CindyJS : MonoBehaviour {
 				destroy(idx);
 			}
 		}
-		if ( Input.GetKeyDown (KeyCode.B) ) {
+		if ( Input.GetKeyDown (KeyCode.E) ) {
 			var idx = 2;
 			if( id_test[idx] == -1f ){
-				var id = begin(idx, "Test_Ball");
-				sphere(id, 0.1f, 1f, 0f, 0f);
+				var id = begin(idx,"Test_Enneper");
+				enneper();
 				addcol(id);
+				setmass(id,10f);
+				end();
+				setpos(id,-2f,0f,0f);
+			}
+			else{
+				destroy(idx);
+			}
+		}		
+		if ( Input.GetKeyDown (KeyCode.B) ) {
+			var idx = 3;
+			if( id_test[idx] == -1f ){
+				var id = begin(idx, "Test_Ball");
+				sphere(0.1f, 1f, 0f, 0f);
+				addcol(id);
+				setmass(id,10f);
 				end();
 				setpos(id,4f,0f,0f);
 				setvel(id,-1f,0f,0f);
@@ -312,39 +381,42 @@ public class CindyJS : MonoBehaviour {
 		return uc3dBuffer[idx_uc3dBuffer++];
 	}
 
+	private int readInt(){
+		return (int)uc3dBuffer[idx_uc3dBuffer++];
+	}
+
 	private bool readBoolean(){
 		var ret = false;
 		if( uc3dBuffer[idx_uc3dBuffer++] > 0 ) ret = true;
 		return ret;
 	}
 
+	private void readColor(){
+		var r = uc3dBuffer[idx_uc3dBuffer++];
+		var g = uc3dBuffer[idx_uc3dBuffer++];
+		var b = uc3dBuffer[idx_uc3dBuffer++];
+		frontColor = new Color ( r, g, b );
+	}
+
+	private void readColors(){
+		frontColors.Clear();
+		var colorssize = (int)uc3dBuffer[idx_uc3dBuffer++];
+		for (var i = 0; i < colorssize; ++i) {
+			var r = uc3dBuffer[idx_uc3dBuffer++];
+			var g = uc3dBuffer[idx_uc3dBuffer++];
+			var b = uc3dBuffer[idx_uc3dBuffer++];
+			frontColors.Add( new Color ( r, g, b ) );
+		}
+	}
+
 	private void readModifiers(){
 
 		while( true ){
-
-			var modifiers = (MODIFIERS)((int)uc3dBuffer[idx_uc3dBuffer++]);
-			if( modifiers== MODIFIERS.Color ){
-				var r = uc3dBuffer[idx_uc3dBuffer++];
-				var g = uc3dBuffer[idx_uc3dBuffer++];
-				var b = uc3dBuffer[idx_uc3dBuffer++];
-				frontColor = new Color ( r, g, b );
-			}
-			else if( modifiers == MODIFIERS.Radius  ){
-				radius = uc3dBuffer[idx_uc3dBuffer++];
-			}
-			else if( modifiers == MODIFIERS.Colors  ){
-				frontColors.Clear();
-				var colorssize = (int)uc3dBuffer[idx_uc3dBuffer++];
-				for (var i = 0; i < colorssize; ++i) {
-					var r = uc3dBuffer[idx_uc3dBuffer++];
-					var g = uc3dBuffer[idx_uc3dBuffer++];
-					var b = uc3dBuffer[idx_uc3dBuffer++];
-					frontColors.Add( new Color ( r, g, b ) );
-				}
-			}
-			else if( modifiers == MODIFIERS.Topology  ){
-				topology = (TOPOLOGY)( (int) uc3dBuffer[idx_uc3dBuffer++] );
-			}
+			var modifiers = (MODIFIERS)( readInt() );
+			if( modifiers== MODIFIERS.Color ) readColor();
+			else if( modifiers == MODIFIERS.Radius  ) radius = readFloat();
+			else if( modifiers == MODIFIERS.Colors  ) readColors();
+			else if( modifiers == MODIFIERS.Topology  )	topology = (TOPOLOGY)( readInt() );
 			else break;
 		}
 	}
@@ -357,6 +429,8 @@ public class CindyJS : MonoBehaviour {
 		foreach( var o in gobjs.Values ){
 			if( testmode ) Manager.DebugLog( "CindyJS::Clear3D : Destroy " + o.name );
 			o.destroyCallback = null;
+			var cl = o.gameObject.GetComponent< BoxCollider >();
+			if( cl != null ) cl.enabled = false;
 			Destroy( o.gameObject );
 		}
 		gobjs.Clear();
@@ -468,6 +542,26 @@ public class CindyJS : MonoBehaviour {
     //////////////////////////////////////////////////////////////////////
     // Appearance handling functions
 
+	public void SetColor3D (){
+
+		var gobj = init_drawing();
+		if( gobj == null ) return;
+
+		readColor();
+
+		var apr = new Appearance( gobj.pointAppearance.Peek () );
+		apr.frontColor = frontColor;
+		gobj.pointAppearance.Push( apr );
+
+		apr = new Appearance( gobj.lineAppearance.Peek () );
+		apr.frontColor = frontColor;
+		gobj.lineAppearance.Push( apr );
+
+		apr = new Appearance( gobj.surfaceAppearance.Peek () );
+		apr.frontColor = frontColor;
+		gobj.surfaceAppearance.Push( apr );
+	}
+
 	public void AddPoint3D (){
 
 		var gobj = init_drawing();
@@ -571,6 +665,19 @@ public class CindyJS : MonoBehaviour {
 
 		var cl = gobj.gameObject.GetComponent< BoxCollider >();
 		if( cl == null ) cl = gobj.gameObject.AddComponent< BoxCollider >();
+	}
+
+	public void SetMass3D (){
+
+		var gobj = init_operation();
+		if( gobj == null ) return;
+		
+		var rb = gobj.gameObject.GetComponent< Rigidbody >();
+		if( rb == null ){
+			rb = gobj.gameObject.AddComponent< Rigidbody >();
+			rb.useGravity = false;
+		}
+		rb.mass = readFloat();
 	}
 
     //////////////////////////////////////////////////////////////////////
