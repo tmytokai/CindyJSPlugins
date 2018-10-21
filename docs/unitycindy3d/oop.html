@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>UnityCindy3D Tutorial</title>
-<meta charset="utf-8">
-<meta charset="utf-8">
+<title>Object Oriented Programming</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <link rel="stylesheet" href="./unitycindy3d.css">
@@ -36,7 +34,7 @@
                 background: "rgb(168,176,192)" 
               } 
               ],
-              scripts: { tick: "update3d()" },
+              scripts: "cs*",
               autoplay: true,
               use: ["UnityCindy3D"],
               angleUnit: "°", 
@@ -100,6 +98,14 @@
   });
 </script>
 
+<script id="csdraw" type="text/x-cindyscript">
+   redraw3d();
+</script>
+
+<script id="cstick" type="text/x-cindyscript">
+  update3d();
+</script>
+
 </head>
 
 <body>
@@ -116,225 +122,12 @@
   <textarea id="yourcode" cols="60" rows="15"></textarea>
 </div>
 
-</div>
-
 <div class="contents">
-
-<p>
-<a href="../">Top</a>
-</p>
-
-<h1>UnityCindy3D Tutorial</h1>
+<p><a href="./">Back</a></p>
+<h1>Object Oriented Programming</h1>
 
 <hr>
-<h2>What's UnityCindy3D?</h2>
-
-<p>
-Coming soon...
-</p>
-
-<p>
-<a href="https://cindyjs.org/">CindyJS</a>
-</p>
-
-<hr>
-<h2>Supported Browsers</h2>
-
-<p>
-<b>Desktop browsers (64bit) :</b>
-<br>
-Firefox 62+  (recommended)
-<br>
-Chrome 57+
-<br>
-Microsoft Edge
-</p>
-
-<p>
-<b>Desktop browsers (32 bit) :</b>
-<br>
-not supported
-</p>
-
-<p>
-<b>Mobile browsers :</b>
-<br>
-(currently) not supported
-</p>
-
-<hr>
-<h2>Usage</h2>
-<p>
-<ul>
-<li>Drag the viewer to rotate the camera.</li>
-<li>Click the viewer to give key focus to the viewer.</li>
-<li>Click the viewer and press F4 key to enter/exit the test mode. <br>(test mode)<br>s key: show/hide a sphere<br>t key: show/hide a torus<br>b key: throw a ball</li>
-</ul>
-</p>
-
-<hr>
-<h2>Drawing</h2>
-
-<h2>Point</h2>
-<p>
-code:
-</p>
-<pre class="code" id="point">
-begin3d();
-
-// axes
-draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
-draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
-draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
-
-s=max( [1, 10.0*(A.x-AL.x)/(AR.x-AL.x)] );
-b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
-draw3d( [2,0,1], size->s, color->[1-b, 0, b] );
-
-end3d();
-</pre>
-<ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('point')" /> </li>
-<li>To change the size, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('point')" /> again. </li>
-<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('point')" />  again. </li>
-</ol>
-
-<h2>Segment</h2>
-<p>
-code:
-</p>
-<pre class="code" id="segment">
-begin3d();
-
-// axes
-draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
-draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
-draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
-
-s=max( [1, 10.0*(A.x-AL.x)/(AR.x-AL.x)] );
-b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
-draw3d( [0,0,0], [2,0,1], size->s, color->[1-b, 0, b] );
-
-end3d();
-</pre>
-<ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('segment')" /> </li>
-<li>To change the size, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('segment')" /> again. </li>
-<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('segment')" /> again. </li>
-</ol>
-
-<h2>Segments</h2>
-<p>
-code:
-</p>
-<pre class="code" id="segments">
-begin3d();
-
-// axes
-draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
-draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
-draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
-
-s=max( [1, 10.0*(A.x-AL.x)/(AR.x-AL.x)] );
-b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
-pt = [ [0,0,0], [2,-1,0], [2,-1,1], [-2,-1,1] ];
-connect3d( pt, size->s, color->[1-b, 0, b], topology->"close" );
-
-end3d();
-</pre>
-<ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('segments')" /> </li>
-<li>To change the size, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('segments')" /> again. </li>
-<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('segments')" /> again. </li>
-</ol>
-
-<h2>Polygon</h2>
-<p>
-code:
-</p>
-<pre class="code" id="polygon">
-begin3d();
-
-// axes
-draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
-draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
-draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
-
-b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
-pt = [ [0,0,0], [2,-1,0], [2,-1,1], [-2,-1,1] ];
-fillpoly3d( pt, color->[1-b, 0, b] );
-
-end3d();
-</pre>
-<ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('polygon')" /> </li>
-<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('polygon')" /> again. </li>
-</ol>
-
-<h2>Sphere</h2>
-<p>
-code:
-</p>
-<pre class="code" id="sphere">
-begin3d();
-
-// axes
-draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
-draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
-draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
-
-s=max( [0.1, 1*(A.x-AL.x)/(AR.x-AL.x)] );
-b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
-drawsphere3d( [2,0,1], s, color->[1-b, 0, b] );
-
-end3d();
-</pre>
-<ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('sphere')" /> </li>
-<li>To change the radius, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('sphere')" /> again. </li>
-<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('sphere')" /> again. </li>
-</ol>
-
-<h2><a href="https://en.wikipedia.org/wiki/Torus_knot">Torus Knot(p,q)</a></h2>
-<p>
-code:
-</p>
-<pre class="code" id="torus">
-begin3d();
-
-// axes
-draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
-draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
-draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
-
-n=600; 
-p=3; 
-q=8; 
-pt=apply(0..n-1,i, w =i/n*2*pi; 
-  r=cos(q*w)+2; 
-  ( sin(q*w), r * cos(p*w), r * sin(p*w) ) ); 
-h=-angl/360°;
-cl=apply(0..n,i, hue( i/n+h ); );
-s=max( [1, 5.0*(A.x-AL.x)/(AR.x-AL.x)] );
-connect3d(pt,cl,size->s,topology->"close");
-
-end3d();
-</pre>
-<ol>
-<li>Push <input type="button" value="Run" onclick="runButtonClicked('torus')" /> </li>
-<li>To change the thickness, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('torus')" /> again. </li>
-<li>To change the color, rotate the point C, then push <input type="button" value="Run" onclick="runButtonClicked('torus')" /> again. </li>
-</ol>
-
-<h2><a href="https://en.wikipedia.org/wiki/Enneper_surface">Enneper surface</a></h2>
-<p>
-coming soon...
-</p>
-
-<hr>
-<h2> Object Oriented Programming</h2>
-
-<h2>Basic</h2>
+<h2>Create Objects</h2>
 <p>
 code:
 </p>
@@ -545,9 +338,9 @@ code:
     q=8; 
     pt=apply(0..n-1,i, w =i/n*2*pi; 
       r=cos(q*w)+2; 
-      ( 0.2*sin(q*w), 0.2*r*cos(p*w), 0.2*r*sin(p*w) ) ); 
+      ( 0.5*sin(q*w), 0.5*r*cos(p*w), 0.5*r*sin(p*w) ) ); 
     cl=apply(0..n,i, hue( i/n ); );
-    connect3d(pt,cl,size->1,topology->"close");
+    connect3d(pt,cl,size->2,topology->"close");
 
     // properties
     addcollider3d();
@@ -555,7 +348,7 @@ code:
 
     // methods
     starttorus() := (
-      setposition3d( [0,0,2] );
+      setposition3d( [0,0,5] );
     );
     setstart3d( starttorus() );
 

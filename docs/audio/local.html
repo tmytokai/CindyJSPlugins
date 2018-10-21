@@ -2,9 +2,11 @@
 <html>
 <head>
 <title>Playing a local audio file</title>
-<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
 <link rel="stylesheet" href="https://cindyjs.org/dist/latest/CindyJS.css">
 <script type="text/javascript" src="https://cindyjs.org/dist/latest/Cindy.js"></script>
+
 <script type="text/javascript" src="https://tmytokai.github.io/CindyJSPlugins/dist/latest/audio/audio.js"></script>
 
 <script type="text/javascript">
@@ -20,19 +22,18 @@
     autoplay: true,
     use: [ "audio" ],
     geometry: [
-      {name:"SpectrogramL", type:"Free", pos:[ 0.25,  5.75 ], labeled: true},
-      {name:"SpectrogramR", type:"Free", pos:[ 3.00,  5.75 ], labeled: true},
-      {name:"SpectrumL",    type:"Free", pos:[ 0.25,  2.75 ], labeled: true},
-      {name:"SpectrumR",    type:"Free", pos:[ 3.00,  2.75 ], labeled: true},
+
       {name: "Play", type: "Button", pos: [6.0, 5.5], color: [0.0, 0.0, 0.0], text: "Play"
                    , script: 'playaudio( "file://audiofile" );' },
       {name: "Stop", type: "Button", pos: [6.0, 5.0], color: [0.0, 0.0, 0.0], text: "Stop"
                    , script: 'stopaudio();' },
+
+      {name:"SpectrogramL", type:"Free", pos:[ 0.25,  5.75 ], labeled: true},
+      {name:"SpectrogramR", type:"Free", pos:[ 3.00,  5.75 ], labeled: true},
+      {name:"SpectrumL",    type:"Free", pos:[ 0.25,  2.75 ], labeled: true},
+      {name:"SpectrumR",    type:"Free", pos:[ 3.00,  2.75 ], labeled: true},
     ],
   } );
-</script>
-
-<script id="csinit" type="text/x-cindyscript">
 </script>
 
 <script id="csdraw" type="text/x-cindyscript">
@@ -45,12 +46,12 @@
 </head>
 
 <body>
+<p><a href="./">Back</a></p>
 <h2>Playing a local audio file</h2>
 <ol>
-<li>Select a file : <input type="file" id="audiofile"></li>
-<li>Push the "Play" button.</li>
-<li>Push the "Stop" button to stop.</li>
-</p>
+<li>Select a file from <input type="file" id="audiofile"></li>
+<li>Push Play button.</li>
+</ol>
 <div id="CSCanvas" style="width:700px; height:600px;"></div>
 </body>
 

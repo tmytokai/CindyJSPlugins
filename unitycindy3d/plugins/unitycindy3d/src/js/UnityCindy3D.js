@@ -140,7 +140,7 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 
 	if( initOperation() == false ) return nada;
 
-	gameInstance.SendMessage ( 'Manager', 'Clear3D', "" ); 
+	gameInstance.SendMessage ( 'Manager', 'Clear3D', "" );
 
 	gameobjs = [];
 	thisid = -1;
@@ -171,13 +171,14 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 	gameInstance.SendMessage ( 'Manager', 'Begin3D', name );
 	thisid = Math.floor(uc3dBuffer[0]);
 
-	let obj = 
+	let obj =
 	    {
 		id: thisid,
 		name: { ctype: "string", value: name },
 		active: active,
 		init: false,
 		start: null,
+    redraw: null,
 		update: null,
 		collisionenter: null
 	    };
@@ -553,6 +554,14 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 	return setMethod( coerce.toInt( evaluate(args[0]) ), "start", "();", args, 1, modifs );
     });
 
+    defOp("setredraw3d", 1, function(args, modifs) {
+	return setMethod( thisid, "redraw", "();", args, 0, modifs );
+    });
+
+    defOp("setredraw3d", 2, function(args, modifs) {
+	return setMethod( coerce.toInt( evaluate(args[0]) ), "redraw", "();", args, 1, modifs );
+    });
+
     defOp("setupdate3d", 1, function(args, modifs) {
 	return setMethod( thisid, "update", "();", args, 0, modifs );
     });
@@ -585,6 +594,27 @@ CindyJS.registerPlugin(1, "UnityCindy3D", function(api) {
 
 	return nada;
     }
+
+    defOp("redraw3d", 0, function(args, modifs) {
+
+	gameobjs.forEach( obj => {
+      if( obj.active ){
+		if( ! obj.init && obj.start != null ){
+		    thisid = obj.id;
+		    cdy.evokeCS( obj.start );
+		    obj.init = true;
+		}
+		if( obj.redraw != null ){
+		    thisid = obj.id;
+		    cdy.evokeCS( obj.redraw );
+		}
+	    }
+	});
+
+	thisid = -1;
+
+	return nada;
+    });
 
     defOp("update3d", 0, function(args, modifs) {
 

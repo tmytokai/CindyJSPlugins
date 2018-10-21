@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Drawing</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<link rel="stylesheet" href="./unitycindy3d.css">
+
+<link rel="stylesheet" href="https://cindyjs.org/dist/latest/CindyJS.css">
+<script type="text/javascript" src="https://cindyjs.org/dist/latest/Cindy.js"></script>
+
+<link rel="stylesheet"         href="../dist/latest/unitycindy3d/viewer/TemplateData/style.css">
+<link rel="shortcut icon"      href="../dist/latest/unitycindy3d/viewer/TemplateData/favicon.ico">
+<script type="text/javascript" src="../dist/latest/unitycindy3d/viewer/TemplateData/UnityProgress.js"></script>  
+<script type="text/javascript" src="../dist/latest/unitycindy3d/viewer/Build/UnityLoader.js"></script>
+<script type="text/javascript" src="../dist/latest/unitycindy3d/UnityCindy3D.js"></script>
+
+<script type="text/javascript">
+  let cdy = null;
+  let gameInstance = UnityLoader.instantiate( "UC3DCanvas", 
+                                              "../dist/latest/unitycindy3d/viewer/Build/WebGL.json", 
+                                              {onProgress: UnityProgress} );
+  const startCS = function ()
+  {
+    if( gameInstance == null ) return; 
+    if( cdy != null ) return;
+
+    cdy = CindyJS( {
+            ports: [
+              {
+                id: "CSCanvas", 
+                width: 600, height: 100, 
+                transform: [ { visibleRect: [ -3, 0.5, 3, -0.5 ] } ],  // left,top,right,bottom
+                background: "rgb(168,176,192)" 
+              } 
+              ],
+              scripts: "cs*",
+              autoplay: true,
+              use: ["UnityCindy3D"],
+              angleUnit: "°", 
+              geometry: [
+                {name:"AL", type:"Free", pos:[ -1,  0.2], color: [ 0, 0, 0 ], size: 1, pinned: true},
+                {name:"AR", type:"Free", pos:[  1,  0.2], color: [ 0, 0, 0 ], size: 1, pinned: true},
+                {name:"sga", type:"Segment", args:["AL","AR"], color:[ 0, 0, 0], size:1 },
+                {name:"A", type:"PointOnSegment", args: ["sga"], pos:[ 0,  0.2], color: [ 1, 1, 0 ], labeled: true},
+
+                {name:"BL", type:"Free", pos:[ -1,  -0.2], color: [ 0, 0, 0 ], size: 1, pinned: true},
+                {name:"BR", type:"Free", pos:[  1,  -0.2], color: [ 0, 0, 0 ], size: 1, pinned: true},
+                {name:"sgb", type:"Segment", args:["BL","BR"], color:[ 0, 0, 0], size:1 },
+                {name:"B", type:"PointOnSegment", args: ["sgb"], pos:[ 0,  -0.2], color: [ 0, 1, 1 ], labeled: true},
+
+                {name:"O", type:"Free", pos:[-2,0], size:0, pinned: true },
+                {name:"CMR", type:"CircleMFixedr", args:["O"], radius:0.4 },
+                {name:"C", type:"PointOnCircle", args:["CMR"], pos:[-1.6,0], color:[ 1, 0, 0 ], labeled: true },
+                {name:"D", type:"Free", pos:[-1.6,0], size:0, pinned: true, labeled: false },
+                {name: "OC", type: "Segment", color: [ 0.0, 0.0, 1.0 ], args: [ "O", "C" ] }, 
+		{name: "OD", type: "Segment", color: [ 0.0, 0.0, 1.0 ], args: [ "O", "D" ] }, 
+		{name: "angl", type: "Angle", args: [ "OC", "OD", "O" ], angle: 0 }
+              ],
+            } );
+  };
+
+  const onCollisionEnterCS = function (id1,id2)
+  {
+    if( cdy != null ) cdy.evokeCS( "oncollisionenter3d("+id1+","+id2+");" );
+  }
+
+  const onDestroyCS = function (id)
+  {
+    if( cdy != null ) cdy.evokeCS( "ondestroy3d("+id+");" );
+  }
+
+  const resetButtonClicked = function ()
+  {
+    let cs = "clear3d(); A.xy = [0,0.2]; B.xy = [0,-0.2]; C.xy = [-1.6,0];";
+    if( cdy != null ) cdy.evokeCS( cs );
+  }
+
+  const runButtonClicked = function (id)
+  {
+    let cs = "";
+    if( id == "yourcode" ) cs = document.getElementById( id ).value;
+    else cs = document.getElementById( id ).textContent;
+    console.log(cs);
+    if( cdy != null ) cdy.evokeCS( "clear3d();" + cs );
+  }
+
+  document.addEventListener( 'click', function(e) 
+  {
+    if( gameInstance == null ) return;
+    if( cdy == null ) return;
+
+    if (e.target.id == "#canvas") {
+          gameInstance.SendMessage ( 'Manager', 'FocusCanvas3D', "true" );
+      } else {
+          gameInstance.SendMessage ( 'Manager', 'FocusCanvas3D', "false" );
+      }
+  });
+</script>
+
+<script id="csdraw" type="text/x-cindyscript">
+   redraw3d();
+</script>
+
+<script id="cstick" type="text/x-cindyscript">
+  update3d();
+</script>
+
+</head>
+
+<body>
+
+<div class="side">
+  <div id="UC3DCanvas" style="width: 600px; height: 400px"></div>
+  <div id="CSCanvas"   style="width: 600px; height: 100px">Loading...Please wait.</div>
+  <br>
+  <input type="button" value="Reset" onclick="resetButtonClicked()" />
+  <br>
+  <p>
+  <input type="button" value="Run the under code" onclick="runButtonClicked('yourcode')" />
+  </p>
+  <textarea id="yourcode" cols="60" rows="15"></textarea>
+</div>
+
+<div class="contents">
+<p><a href="./">Back</a></p>
+<h1>Drawing</h1>
+
+<hr>
+<h2>Point</h2>
+<p>
+code:
+</p>
+<pre class="code" id="point">
+begin3d();
+
+// axes
+draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
+draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
+draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
+
+s=max( [1, 10.0*(A.x-AL.x)/(AR.x-AL.x)] );
+b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
+draw3d( [2,0,1], size->s, color->[1-b, 0, b] );
+
+end3d();
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('point')" /> </li>
+<li>To change the size, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('point')" /> again. </li>
+<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('point')" />  again. </li>
+</ol>
+
+<h2>Segment</h2>
+<p>
+code:
+</p>
+<pre class="code" id="segment">
+begin3d();
+
+// axes
+draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
+draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
+draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
+
+s=max( [1, 10.0*(A.x-AL.x)/(AR.x-AL.x)] );
+b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
+draw3d( [0,0,0], [2,0,1], size->s, color->[1-b, 0, b] );
+
+end3d();
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('segment')" /> </li>
+<li>To change the size, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('segment')" /> again. </li>
+<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('segment')" /> again. </li>
+</ol>
+
+<h2>Segments</h2>
+<p>
+code:
+</p>
+<pre class="code" id="segments">
+begin3d();
+
+// axes
+draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
+draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
+draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
+
+s=max( [1, 10.0*(A.x-AL.x)/(AR.x-AL.x)] );
+b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
+pt = [ [0,0,0], [2,-1,0], [2,-1,1], [-2,-1,1] ];
+connect3d( pt, size->s, color->[1-b, 0, b], topology->"close" );
+
+end3d();
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('segments')" /> </li>
+<li>To change the size, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('segments')" /> again. </li>
+<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('segments')" /> again. </li>
+</ol>
+
+<h2>Polygon</h2>
+<p>
+code:
+</p>
+<pre class="code" id="polygon">
+begin3d();
+
+// axes
+draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
+draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
+draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
+
+b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
+pt = [ [0,0,0], [2,-1,0], [2,-1,1], [-2,-1,1] ];
+fillpoly3d( pt, color->[1-b, 0, b] );
+
+end3d();
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('polygon')" /> </li>
+<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('polygon')" /> again. </li>
+</ol>
+
+<h2>Sphere</h2>
+<p>
+code:
+</p>
+<pre class="code" id="sphere">
+begin3d();
+
+// axes
+draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
+draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
+draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
+
+s=max( [0.1, 1*(A.x-AL.x)/(AR.x-AL.x)] );
+b=min( [1.0, (B.x-BL.x)/(BR.x-BL.x)]);
+drawsphere3d( [2,0,1], s, color->[1-b, 0, b] );
+
+end3d();
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('sphere')" /> </li>
+<li>To change the radius, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('sphere')" /> again. </li>
+<li>To change the color, drag the point B, then push <input type="button" value="Run" onclick="runButtonClicked('sphere')" /> again. </li>
+</ol>
+
+<h2><a href="https://en.wikipedia.org/wiki/Torus_knot">Torus Knot(p,q)</a></h2>
+<p>
+code:
+</p>
+<pre class="code" id="torus">
+begin3d();
+
+// axes
+draw3d( [-5,0,0], [5,0,0], color->[1,0,0], size->0.3 ); //x
+draw3d( [0,-5,0], [0,5,0], color->[0,1,0], size->0.3 ); //y 
+draw3d( [0,0,-5], [0,0,5], color->[0,0,1], size->0.3 ); //z
+
+n=600; 
+p=3; 
+q=8; 
+pt=apply(0..n-1,i, w =i/n*2*pi; 
+  r=cos(q*w)+2; 
+  ( sin(q*w), r * cos(p*w), r * sin(p*w) ) ); 
+h=-angl/360°;
+cl=apply(0..n,i, hue( i/n+h ); );
+s=max( [1, 5.0*(A.x-AL.x)/(AR.x-AL.x)] );
+connect3d(pt,cl,size->s,topology->"close");
+
+end3d();
+</pre>
+<ol>
+<li>Push <input type="button" value="Run" onclick="runButtonClicked('torus')" /> </li>
+<li>To change the thickness, drag the point A, then push <input type="button" value="Run" onclick="runButtonClicked('torus')" /> again. </li>
+<li>To change the color, rotate the point C, then push <input type="button" value="Run" onclick="runButtonClicked('torus')" /> again. </li>
+</ol>
+
+<br>
+<h2>To be continued..</h2>
+</div>
+
+</body>
+</html>

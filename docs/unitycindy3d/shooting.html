@@ -2,8 +2,6 @@
 <html>
 <head>
 <title>Shooting</title>
-<meta charset="utf-8">
-<meta charset="utf-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <link rel="stylesheet" href="./unitycindy3d.css">
@@ -41,7 +39,8 @@
               use: ["UnityCindy3D"],
               angleUnit: "°",
               geometry: [
-                {name: "Start", type: "Button", pos: [2,  0], color: [0.0, 0.0, 0.0], text: "Start", script: 'startbutton();' },
+                {name: "Start", type: "Button", pos: [2,  0.17], color: [0.0, 0.0, 0.0], text: "Start", script: 'gamescene();' },
+                {name: "Reset", type: "Button", pos: [2, -0.27], color: [0.0, 0.0, 0.0], text: "Reset", script: 'titlescene();' },
 
                 {name:"AL", type:"Free", pos:[ 0,  0], color: [ 0, 0, 0 ], size: 1, pinned: true },
                 {name:"AR", type:"Free", pos:[ 1,  0], color: [ 0, 0, 0 ], size: 1, pinned: true },
@@ -76,114 +75,169 @@
 
 <script id="csinit" type="text/x-cindyscript">
 
-  Clear3D();
+  //////////////
+  // title scene
+  titlescene() := (
 
-  playing = false;
-  score=0;
-  countenemy = 0;
+    scene = "title";
+    clear3d();
+    A.xy = [0.5,0];
 
-  axes = createprototype3d( "axes" );
-    draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
-    draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
-    draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
-  end3d();
+    //////////////////
+    // title manager (invisible)
+    begin3d( "manager" );
 
-  enemy = createprototype3d( "enemy" );
-    n=600; 
-    p=3; 
-    q=8; 
-    pt=apply(0..n-1,i, w =i/n*2*pi; 
-      r=cos(q*w)+2; 
-      ( 0.5*sin(q*w), 0.5*r*cos(p*w), 0.5*r*sin(p*w) ) ); 
-    cl=apply(0..n,i, hue( i/n ); );
-    connect3d(pt,cl,size->2,topology->"close");
-
-    // properties
-    addcollider3d();
-    addmass3d(10);
-    usegravity3d( true );
-
-    // methods
-    startenemy() := (
-      destroy3d( 6 );
-    );
-    setstart3d( startenemy() );
-
-    collisionenterenemy( hitobj ) := (
-       if( get3d(hitobj,"name") == "bullet",
-          score = score+1;
-          destroy3d( 0.5 ); 
-          destroy3d( hitobj, 0 ); 
-        );
-    );
-    setcollisionenter3d( collisionenterenemy() );
-
-  end3d();
-
-  bullet = createprototype3d( "bullet" );
-    draw3d( [0,0,0], 0.5, color->[1, 1, 1] );
-
-    // properties
-    addcollider3d();
-    addmass3d(1);
-
-    // methods
-    startbullet() := (
-      setvelocity3d( [-4,0,0] );
-      destroy3d( 4 );
-    );
-    setstart3d( startbullet() );
-
-  end3d();
-
-  player = createprototype3d( "player" );
-    drawsphere3d( [0,0,0], 0.3, color->[1, 0, 0] );
-
-    // fields
-    set3d( "counter", 0);
-
-    // methods
-    updateplayer() := (
-      p = getposition3d();
-      p_2 = -2 + 4*(A.x-AL.x)/(AR.x-AL.x);
-      setposition3d( p );
-
-      counter = get3d( "counter" ) - 1;
-      if( counter < 0,
-          counter = 10;
-          p_1 = p_1 - 0.2;
-          instantiate3d( bullet, p );
+      // methods
+      redrawmanager() := (
+        drawtext((-2.5,  0.17), "- Shooting -" );
+        drawtext((-2.5, -0.27), "Push Start Button" );
       );
-      set3d( "counter", counter);
-    );
-    setupdate3d( updateplayer() );
+      setredraw3d( redrawmanager() );
 
-  end3d();
+    end3d();
+  );
 
-  startbutton() := (
-    if( playing == false,
+  //////////////
+  // game scene
+  gamescene() := (
+
+    if( scene == "title",
+
+      scene = "game";
+      clear3D();
       A.xy = [0.5,0];
-      playing = true;
-      instantiate3d( axes, [0, 0, 0 ] );
-      instantiate3d( player, [3, 0, 0 ] );
+
+      //////////////////
+      // game manager (invisible)
+      manager = begin3d( "manager" );
+
+        // fields
+        set3d( "counter", 0);
+        set3d( "score", 0);
+
+        // methods
+        startmanager() :=(
+          instantiate3d( axes, [0, 0, 0 ] );
+          instantiate3d( player, [3, 0, 0 ] );
+        );
+        setstart3d( startmanager() );
+
+        redrawmanager() := (
+          drawtext((-2.5, 0), "score: " + get3d( "score" ) );
+        );
+        setredraw3d( redrawmanager() );
+
+        updatemanager() := (
+          counter = get3d( "counter" ) - 1;
+          if( counter < 0,
+              y = -2+random(4);
+              instantiate3d( enemy, [-2, y, 5 ] );
+              counter = 100;
+          );
+          set3d( "counter", counter);
+        );
+        setupdate3d( updatemanager() );
+
+      end3d();
+
+      //////////////////
+      // axes
+      axes = createprototype3d( "axes" );
+        draw3d( [-5,0,0], [5,0,0], color->[1, 0, 0], size->0.3 ); // x
+        draw3d( [0,-5,0], [0,5,0], color->[0, 1, 0], size->0.3 ); // y
+        draw3d( [0,0,-5], [0,0,5], color->[0, 0, 1], size->0.3 ); // z
+      end3d();
+
+      //////////////////
+      // enemy
+      enemy = createprototype3d( "enemy" );
+        n=600;
+        p=3;
+        q=8;
+        pt=apply(0..n-1,i, w =i/n*2*pi;
+          r=cos(q*w)+2;
+          ( 1*sin(q*w), 1*r*cos(p*w), 1*r*sin(p*w) ) );
+        cl=apply(0..n,i, hue( i/n ); );
+        connect3d(pt,cl,size->4,topology->"close");
+
+        // properties
+        addcollider3d();
+        setmass3d(1);
+        usegravity3d( true );
+
+        // methods
+        startenemy() := (
+          destroy3d( 6 );
+        );
+        setstart3d( startenemy() );
+
+        collisionenterenemy( hitobj ) := (
+           if( get3d(hitobj,"name") == "bullet",
+              set3d(manager,"score", get3d(manager,"score")+1);
+              setvelocity3d([-2,0,0.5]);
+              destroy3d( hitobj, 0 );
+            );
+        );
+        setcollisionenter3d( collisionenterenemy() );
+
+      end3d();
+
+      //////////////////
+      // bullet
+      bullet = createprototype3d( "bullet" );
+        draw3d( [0,0,0], 0.5, color->[1, 1, 1] );
+
+        // properties
+        addcollider3d();
+        setmass3d(10);
+
+        // methods
+        startbullet() := (
+          destroy3d( 4 );
+        );
+        setstart3d( startbullet() );
+
+      end3d();
+
+      //////////////////
+      // player
+      player = createprototype3d( "player" );
+        drawsphere3d( [0,0,0], 0.3, color->[1, 0, 0] );
+
+        // fields
+        set3d( "counter", 0);
+
+        // methods
+        updateplayer() := (
+          p = getposition3d();
+          p_2 = -2 + 4*(A.x-AL.x)/(AR.x-AL.x);
+          setposition3d( p );
+
+          counter = get3d( "counter" ) - 1;
+          if( counter < 0,
+              counter = 10;
+              p_1 = p_1 - 0.2;
+              b = instantiate3d( bullet, [p_1,p_2-0.2,p_3] );
+              setvelocity3d(b, [-4,-2,0] );
+              b = instantiate3d( bullet, [p_1,p_2,p_3] );
+              setvelocity3d(b, [-4,0,0] );
+              b = instantiate3d( bullet, [p_1,p_2+0.2,p_3] );
+              setvelocity3d(b, [-4,2,0] );
+          );
+          set3d( "counter", counter);
+        );
+        setupdate3d( updateplayer() );
+
+      end3d();
     );
   );
+
+  titlescene();
 
 </script>
 
 <script id="csdraw" type="text/x-cindyscript">
-  if(playing == true,
-
-     countenemy = countenemy -1;
-     if( countenemy < 0,
-       y = -2+random(4);
-       instantiate3d( enemy, [-2, y, 5 ] );
-       countenemy = 100;
-     );
-     drawtext((-2.5, 0), "score: " + score),
-
-     drawtext((-2.5, 0), "Push Start Button")
-   );
+   redraw3d();
 </script>
 
 <script id="cstick" type="text/x-cindyscript">
@@ -194,8 +248,11 @@
 
 <body>
 <div class="center">
+  <p><a href="./">Back</a></p>
+  <h1>Shooting</h1>
   <div id="UC3DCanvas" style="width: 600px; height: 400px"></div>
   <div id="CSCanvas"   style="width: 600px; height: 100px">Loading...Please wait.</div>
+  <a href="https://github.com/tmytokai/CindyJSPlugins/blob/master/docs/unitycindy3d/shooting.html">Source</a>
 </div>
 </body>
 </html>
