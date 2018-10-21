@@ -1,27 +1,10 @@
 # CindyJSPlugins
 
----
-
-# Supported browsers
-
-* UnityCindy3D doesn't work on older browsers because it uses WebAssembly.
-* UnityCindy3D opened from local file URLs doesn't work on Chome for [security reasons](https://docs.unity3d.com/Manual/webgl-building.html).
-
-## Desktop browsers (64bit) :
-
-    Firefox 62+  (recommended)
-    Chrome 57+
-    Microsoft Edge
-
-## Desktop browsers (32 bit) :
-not supported
-
-## Mobile browsers :
-(currently) not supported
+go to [Web page](https://tmytokai.github.io/CindyJSPlugins/)
 
 ---
 
-# Building the plugins
+# Building
 
 ## Preparation
 
@@ -46,7 +29,7 @@ not supported
     $ cp build/js/UnityCindy3D.js ../docs/dist/latest/unitycindy3d/
     $ cd ..
 
-## Building the viewer of UnityCindy3D
+## Building the 3D viewer of UnityCindy3D
 
 1. Start UnityEditor.
 1. Open "unitycindy3d/viewer" folder.
