@@ -31,11 +31,11 @@ go to [Web page](https://tmytokai.github.io/CindyJSPlugins/)
 
 ## Building the 3D viewer of UnityCindy3D
 
-1. Start UnityEditor.
-1. Open "unitycindy3d/viewer" folder.
-1. Open "Viewer" scene.
-1. Select "File" menu > "Build Settings" submenu.
-1. Select "WebGL".
-1. Push the "Build" button.
-1. Input any build folder in the name textbox and push the "Save" button.
-1. Move "(build folder)/Build" and "(build folder)/TemplateData" into "docs/dist/latest/unitycindy3d/viewer"
+    1. Start UnityEditor.
+    1. Open "unitycindy3d/viewer" folder.
+    1. Open "Viewer" scene.
+    1. Select "File" menu > "Build Settings" submenu.
+    1. Select "WebGL".
+    1. Push the "Build" button.
+    1. Input any build folder in the name textbox and push the "Save" button.
+    1. Move "(build folder)/Build" and "(build folder)/TemplateData" into "docs/dist/latest/unitycindy3d/viewer"

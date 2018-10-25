@@ -70,6 +70,9 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	// default
 	Width : 256,
 	Height : 256,
+
+        minfreq : 0,
+        maxfreq : 0,
     }
 
     // data structure for colormap
@@ -96,6 +99,8 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	    audioBufferSrc = audioCtx.createBufferSource();
 	    audioBufferSrc.buffer = buffer;
 	    audioBufferSrc.loop = true;
+
+            audioSpecGram.maxfreq = audioBufferSrc.buffer.sampleRate/2;
 
 	    console.log( "rate = " + audioBufferSrc.buffer.sampleRate );
 	    console.log( "duration = " + audioBufferSrc.buffer.duration );
@@ -340,37 +345,24 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	request.send();
     }
 
-    const GetDstPoint = function( ch, dst ){
+    const PointToCanvasPoint = function( px, py ){
 
-        let clw = api.instance["canvas"]["clientWidth"];
-        let clh = api.instance["canvas"]["clientHeight"];
-        let iw = api.instance["canvas"]["width"];
-        let ih = api.instance["canvas"]["height"];
         let m = api.getInitialMatrix();
-	let transf = function (m, px, py) { //copied from evaluator.screen$0 in src/js/libcs/Operators.js 
-	    let xx = px - m.tx;
-	    let yy = py + m.ty;
-	    let x = (xx * m.d - yy * m.b) / m.det;
-	    let y = -(-xx * m.c + yy * m.a) / m.det;
-	    return {
-		x: x,
-		y: y
-	    };
+	return {
+	   x: m.a*px - m.b*py + m.tx,
+	   y: m.c*px - m.d*py - m.ty
 	};
-        let cul = transf(m,0,0);
-        let cll = transf(m,0,clh);
-        let clr = transf(m,clw,clh);
-	let dstx = Math.abs( (dst.x - cll.x) / (clr.x - cll.x) ) * clw;
-	let dsty = Math.abs( (cul.y - dst.y) / (cul.y - cll.y) ) * clh;
-/*
-	console.log( "dst " + dst.x + " / " + dst.y );
-	console.log( "cul " + cul.x + " / " + cul.y );
-	console.log( "cll " + cll.x + " / " + cll.y );
-	console.log( "clr " + clr.x + " / " + clr.y );
-	console.log( "dstx " + dstx );
-	console.log( "dsty " + dsty );
-*/
-	return [dstx, dsty];
+    }
+
+    const CanvasPointToPoint = function( px, py ){
+
+        let m = api.getInitialMatrix();
+        var xx = px - m.tx;
+        var yy = py + m.ty;
+	return {
+	   x:  ( m.d*xx - m.b*yy) / m.det,
+	   y: -(-m.c*xx + m.a*yy) / m.det
+	};
     }
 
     api.defineFunction( "playaudio", 1, function(args, modifs) {
@@ -424,8 +416,8 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	if( ch.ctype != "number" ) return api.nada;
 	ch = ch.value.real;
 
-	let dst = api.extractPoint( api.evaluateAndVal( args[0] ) );
-	let dstpoint = GetDstPoint( ch, dst );
+	let pt = api.extractPoint( api.evaluateAndVal( args[0] ) );
+	let pt_canvas = PointToCanvasPoint( pt.x, pt.y );
 
 	if( csctx == null ){
             csctx = api.instance["canvas"].getContext("2d");
@@ -434,11 +426,11 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 
 	if( audioSpec.canvas[ch] == null ){
 	    csctx.fillStyle = "black";
-	    csctx.fillRect( dstpoint[0], dstpoint[1], audioSpec.Width, audioSpec.Height );
+	    csctx.fillRect( pt_canvas.x, pt_canvas.y, audioSpec.Width, audioSpec.Height );
 	    return api.nada;
         }
 
-	csctx.putImageData( audioSpec.image[ch], dstpoint[0], dstpoint[1] );
+	csctx.putImageData( audioSpec.image[ch], pt_canvas.x, pt_canvas.y );
 
         return api.nada;
     });
@@ -449,8 +441,8 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 	if( ch.ctype != "number" ) return api.nada;
 	ch = ch.value.real;
 
-	let dst = api.extractPoint( api.evaluateAndVal( args[0] ) );
-	let dstpoint = GetDstPoint( ch, dst );
+	let pt = api.extractPoint( api.evaluateAndVal( args[0] ) );
+	let pt_canvas = PointToCanvasPoint( pt.x, pt.y );
 
 	if( csctx == null ){
             csctx = api.instance["canvas"].getContext("2d");
@@ -459,19 +451,34 @@ CindyJS.registerPlugin( 1, "audio", function(api) {
 
 	if( audioSpecGram.canvas[ch] == null ){
 	    csctx.fillStyle = "hsl(240, 100%, 50%)";
-	    csctx.fillRect( dstpoint[0], dstpoint[1], audioSpecGram.Width, audioSpecGram.Height );
+	    csctx.fillRect( pt_canvas.x, pt_canvas.y, audioSpecGram.Width, audioSpecGram.Height );
 	    return api.nada;
         }
 
 	csctx.putImageData( audioSpecGram.image[ch], 
-			    dstpoint[0]-audioSpecGram.pos, 
-			    dstpoint[1], 
+			    pt_canvas.x-audioSpecGram.pos, 
+			    pt_canvas.y, 
 			    audioSpecGram.pos, 0, audioSpecGram.Width-audioSpecGram.pos, audioSpecGram.Height );
 	if( audioSpecGram.pos > 0 ){
 	    csctx.putImageData( audioSpecGram.image[ch], 
-				dstpoint[0] + audioSpecGram.Width - audioSpecGram.pos, 
-				dstpoint[1], 0, 0, audioSpecGram.pos, audioSpecGram.Height );
+				pt_canvas.x + audioSpecGram.Width - audioSpecGram.pos, 
+				pt_canvas.y, 0, 0, audioSpecGram.pos, audioSpecGram.Height );
 	}
+
+        // draw frequency
+        let cscode = '';
+        let dfreq = 2000.0;
+        let f = audioSpecGram.minfreq;
+        let n = ( audioSpecGram.maxfreq - audioSpecGram.minfreq ) / dfreq;
+        let h = CanvasPointToPoint( 0, 0 ).y - CanvasPointToPoint( 0, audioSpecGram.Height ).y;
+        let x = (pt.x-0.05);
+        let dy = h / n;
+        for( let i = 0; i <= Math.floor(n); ++i ){
+          cscode += 'drawtext(['+x+','+(pt.y-h+dy*i-0.05)+'],'+f+',align->"right",size->10);';
+          f += dfreq;
+        }
+        cscode += 'drawtext(['+x+','+(pt.y+0.05)+'],"Hz",align->"right",size->10);';
+        api.instance.evalcs( cscode );
 
         return api.nada;
     });

@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://cindyjs.org/dist/latest/CindyJS.css">
 <script type="text/javascript" src="https://cindyjs.org/dist/latest/Cindy.js"></script>
 
-<script type="text/javascript" src="https://tmytokai.github.io/CindyJSPlugins/dist/latest/audio/audio.js"></script>
+<script type="text/javascript" src="../dist/latest/audio/audio.js"></script>
 
 <script type="text/javascript">
   CindyJS( {
@@ -18,20 +18,24 @@
         transform: [ { visibleRect: [ 0, 6, 7, 0 ] } ]  // left,top,right,bottom
       }
     ],
+    defaultAppearance: {
+       fontFamily: "sans-serif",
+       textsize: 12.0
+    },
     scripts:"cs*",
     autoplay: true,
     use: [ "audio" ],
     geometry: [
 
-      {name: "Play", type: "Button", pos: [6.0, 5.5], color: [0.0, 0.0, 0.0], text: "Play"
+      {name: "Play", type: "Button", pos: [6.25, 5.5], color: [0.0, 0.0, 0.0], text: "Play",
                    , script: 'playaudio( "https://tmytokai.github.io/CindyJSPlugins/audio/sample.mp3" );' },
-      {name: "Stop", type: "Button", pos: [6.0, 5.0], color: [0.0, 0.0, 0.0], text: "Stop"
+      {name: "Stop", type: "Button", pos: [6.25, 5.0], color: [0.0, 0.0, 0.0], text: "Stop"
                    , script: 'stopaudio();' },
 
-      {name:"SpectrogramL", type:"Free", pos:[ 0.25,  5.75 ], labeled: true},
-      {name:"SpectrogramR", type:"Free", pos:[ 3.00,  5.75 ], labeled: true},
-      {name:"SpectrumL",    type:"Free", pos:[ 0.25,  2.75 ], labeled: true},
-      {name:"SpectrumR",    type:"Free", pos:[ 3.00,  2.75 ], labeled: true},
+      {name:"SpectrogramL", type:"Free", pos:[ 0.50,  5.75 ], labeled: true},
+      {name:"SpectrogramR", type:"Free", pos:[ 3.50,  5.75 ], labeled: true},
+      {name:"SpectrumL",    type:"Free", pos:[ 0.50,  2.75 ], labeled: true},
+      {name:"SpectrumR",    type:"Free", pos:[ 3.50,  2.75 ], labeled: true},
     ],
   } );
 </script>
