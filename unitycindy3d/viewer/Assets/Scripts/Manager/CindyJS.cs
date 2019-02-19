@@ -1,5 +1,5 @@
 ﻿/*
-Copyright (C) 2018 https://github.com/tmytokai/CindyJSPlugins
+Copyright (C) 2018-2019 https://github.com/tmytokai/CindyJSPlugins
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class CindyJS : MonoBehaviour {
 	[DllImport("__Internal")]
 	private static extern void OnCollisionEnterCS( int id1, int id2 );
 
-	[SerializeField] private GameObject GeometricObjectPrefab;
+	[SerializeField] private GameObject GeometricObjectPrefab = null;
 
 	[SerializeField] private Text statusText = null;
 	private float counter_status = 0;
