@@ -224,7 +224,14 @@ code:
     // properties
     addcollider3d();
     setmass3d( 1 );
-    setvelocity3d([-1,0,0]);
+
+    // Unity WebGL has a bug of collider.
+    // Sometimes objects don't collide with each other for "a precision issue".
+    // In this case, it might be a good idea to increase/decrease the velocity a bit.
+    // See also:
+    // https://answers.unity.com/questions/1406530/in-webgl-build-rigidbody-only-collides-with-mesh-c.html
+    // https://forum.unity.com/threads/mesh-colliders-became-unpredictable-in-webgl.536777/
+    setvelocity3d([-1.001,0,0]);
 
   end3d();
 

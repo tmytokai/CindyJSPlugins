@@ -523,7 +523,9 @@ public class CindyJS : MonoBehaviour {
  			cl.center = mr.bounds.center;
  			cl.size = mr.bounds.size;
 
-			if( testmode ) Manager.DebugLog( "CindyJS::End3D : collider size = " + cl.size.x + " / " + cl.size.y + " / " + cl.size.z );
+			if( testmode )
+			Manager.DebugLog( "CindyJS::End3D : collider center = " + cl.center.x + " / " + cl.center.y + " / " + cl.center.z
+			 + " size = " + cl.size.x + " / " + cl.size.y + " / " + cl.size.z );
 		}
 
 		gobj_drawing = null;
@@ -568,6 +570,10 @@ public class CindyJS : MonoBehaviour {
 		if( gobj == null ) return;
 
 		readPoints_zup_righthand();
+		if( points.Count == 0 ){
+			Manager.DebugLogError( "CindyJS::AddPoint3D: points.Count is zero" );
+			return;
+		}
 
 		radius = gobj.pointAppearance.Peek ().radius;
 		frontColor = gobj.pointAppearance.Peek ().frontColor;
@@ -584,12 +590,22 @@ public class CindyJS : MonoBehaviour {
 		if( gobj == null ) return;
 
 		readPoints_zup_righthand();
+		if( points.Count == 0 ){
+			Manager.DebugLogError( "CindyJS::AddLine3D: points.Count is zero" );
+			return;
+		}
 
 		radius = gobj.lineAppearance.Peek ().radius;
 		frontColor = gobj.lineAppearance.Peek ().frontColor;
 		frontColors.Clear ();
 		topology = TOPOLOGY.Open;
 		readModifiers();
+
+		if( testmode ){
+			Manager.DebugLog( "CindyJS::AddLine3D: points = " + points.Count
+			+ " idx =  " + idx_uc3dBuffer 
+			+ " bufferlength = " +uc3dBuffer.Length );
+		}
 
 		gobj.SetLineRadius (radius * POINT_SCALE);
 		gobj.SetLineFrontColor (frontColor);
@@ -608,6 +624,10 @@ public class CindyJS : MonoBehaviour {
 		if( gobj == null ) return;
 
 		readPoints_zup_righthand();
+		if( points.Count == 0 ){
+			Manager.DebugLogError( "CindyJS::AddPolygon3D: points.Count is zero" );
+			return;
+		}
 
 		frontColor = gobj.surfaceAppearance.Peek ().frontColor;
 		readModifiers();
@@ -623,6 +643,10 @@ public class CindyJS : MonoBehaviour {
 		if( gobj == null ) return;
 
 		readPoints_zup_righthand();
+		if( points.Count == 0 ){
+			Manager.DebugLogError( "CindyJS::AddSphere3D: points.Count is zero" );
+			return;
+		}
 
 		radius = gobj.surfaceAppearance.Peek ().radius;
 		frontColor = gobj.surfaceAppearance.Peek().frontColor;

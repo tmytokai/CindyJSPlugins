@@ -1,11 +1,12 @@
 tmp/
 build/
 Library/
-Packages/
 Temp/
 WebGL/
 obj/
 .vscode/
+.DS_Store
+Logs/
 *.sln
 *.csproj
 *~

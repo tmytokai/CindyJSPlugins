@@ -15,16 +15,19 @@ go to [Web page](https://tmytokai.github.io/CindyJSPlugins/)
 
 ## Building the plugin of audio-plugin
 
-    $ ln -rs audio/plugins/audio/ build/plugins/
-    $ cd build
+    $ cd build/plugins/
+    $ ln -s ../../audio/plugins/audio/
+    $ cd ..
+    (for macOS: open package.json and set the version of node-sass to 4.11.0 or later)
     $ node make build=release audio
     $ cp build/js/audio.js ../docs/dist/latest/audio/
     $ cd ..
 
 ## Building the plugin of UnityCindy3D
 
-    $ ln -rs unitycindy3d/plugins/unitycindy3d/ build/plugins/
-    $ cd build
+    $ cd build/plugins/
+    $ ln -s ../../unitycindy3d/plugins/unitycindy3d/
+    $ cd ..
     $ node make build=release unitycindy3d
     $ cp build/js/UnityCindy3D.js ../docs/dist/latest/unitycindy3d/
     $ cd ..
@@ -32,10 +35,10 @@ go to [Web page](https://tmytokai.github.io/CindyJSPlugins/)
 ## Building the 3D viewer of UnityCindy3D
 
     1. Start UnityEditor.
-    1. Open "unitycindy3d/viewer" folder.
-    1. Open "Viewer" scene.
-    1. Select "File" menu > "Build Settings" submenu.
-    1. Select "WebGL".
-    1. Push the "Build" button.
-    1. Input any build folder in the name textbox and push the "Save" button.
-    1. Move "(build folder)/Build" and "(build folder)/TemplateData" into "docs/dist/latest/unitycindy3d/viewer"
+    2. Open "unitycindy3d/viewer" folder.
+    3. Open "Viewer" scene.
+    4. Select "File" menu > "Build Settings" submenu.
+    5. Select "WebGL" and push the "Switch Platform" button.
+    6. Push the "Build" button.
+    7. Select any build folder and push the "Save" button.
+    8. Move "(build folder)/Build" and "(build folder)/TemplateData" into "docs/dist/latest/unitycindy3d/viewer"
